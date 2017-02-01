@@ -1,0 +1,4 @@
+#!/bin/csh
+source /mq/home/m1eph00/.cshrc
+cd /msu/scratch3/m1cjg01/regimechange/Fortran/Nonlinearmodel_v5.0/
+/mq/home/m1eph00/anaconda/bin/ipython analyze_results.py | mail -s "ZLB Paper Reestimation: LATEST RESULTS" edward.p.herbst@frb.gov

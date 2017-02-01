@@ -1,0 +1,178 @@
+MODEL > modelv5_2
+
+ENDOG >
+cap _NOTD
+cc _NOTD
+inv _NOTD
+realw _NOTD
+notr _NOTD
+dp _NOTD
+gdp _NOTD
+xhp _NOTD
+nomr _NOTD
+lam _NOTD
+tobq _NOTD
+lab _NOTD
+util _NOTD
+mcost _NOTD
+rentalk _NOTD
+muc _NOTD
+vi _NOTD
+vp _NOTD
+vw _NOTD
+dw _NOTD
+bc _NOTD
+bi _NOTD
+liqshk _NOTD
+invshk _NOTD
+techshk _NOTD
+intshk _NOTD
+gshk _NOTD
+ashk _NOTD
+errliq _NOTD
+errinv _NOTD
+errtech _NOTD
+errint _NOTD
+errgshk _NOTD
+errashk _NOTD
+
+EQUATION > CAP
+EQTYPE > IMPOSED
+EQ >  tobq = ((1-delta)*beta/gz)*LEAD(tobq,1) + LEAD(lam,1) - lam - LEAD(techshk,1)
+           + (1-((1-delta)*beta/gz))*LEAD(rentalk,1) 
+
+EQUATION > CC
+EQTYPE > IMPOSED
+EQ > (1-gamtil)*(1-gamtil*beta)*lam = -(1+gamtil*gamtil*beta)*cc + gamtil*(LAG(cc,1)-techshk) + gamtil*beta*(LEAD(cc,1) + LEAD(techshk,1))
+
+EQUATION > INV
+EQTYPE > IMPOSED
+EQ > (1-(1-delta)/gz)*(inv + invshk) = cap - ((1-delta)/gz)*(LAG(cap,1) - techshk)
+
+EQUATION > REALW
+EQTYPE > IMPOSED
+EQ > realw = LAG(realw,1) + dw - dp - techshk
+
+EQUATION > NOTR
+EQTYPE > IMPOSED
+EQ > notr =  gam_rs*LAG(notr,1) + (1-gam_rs)*( gam_dp*dp + gamxhp*xhp + gamdy*(gdp - LAG(gdp,1) + techshk)) + intshk
+
+EQUATION > DP
+EQTYPE > IMPOSED
+EQ > dp = beta/(1+beta*(1-ap))*LEAD(dp,1) + (1-ap)/(1+beta*(1-ap))*LAG(dp,1) + kappap*mcost 
+
+EQUATION > GDP
+EQTYPE > IMPOSED
+EQ > gdp = gg*shrcy*cc + gshk + gg*shriy*inv + gg*alpha*((ep-1)/ep)*util 
+
+EQUATION > XHP
+EQTYPE > IMPOSED
+EQ > xhp = alpha*util + (1-alpha)*lab
+
+EQUATION > NOMR
+EQTYPE > IMPOSED
+EQ > nomr = notr
+
+EQUATION > LAM
+EQTYPE > IMPOSED
+EQ > lam = LEAD(lam,1) + (notr - LEAD(dp,1)) + liqshk - LEAD(techshk,1)
+
+EQUATION > TOBQ
+EQTYPE > IMPOSED
+EQ >  tobq = -invshk + phii_jpt*(1+beta)*inv-phii_jpt*LAG(inv,1) - beta*phii_jpt*LEAD(inv,1) + phii_jpt*techshk - beta*phii_jpt*LEAD(techshk,1)
+
+EQUATION > LAB
+EQTYPE > IMPOSED
+EQ > (1-alpha)*(lab + ashk) = gdp-alpha*(util + LAG(cap,1) - techshk)
+
+EQUATION > util
+EQTYPE > IMPOSED
+EQ >  util = (1/sigmaa)*rentalk
+
+EQUATION > MCOST
+EQTYPE > IMPOSED
+EQ > mcost = realw - (gdp - lab)
+         
+EQUATION > RENTALK
+EQTYPE > IMPOSED
+EQ >  rentalk =  realw + lab - util - LAG(cap,1) + techshk
+
+EQUATION > MUC
+EQTYPE > IMPOSED
+EQ > (1-gamtil)*muc = -cc + gamtil*(LAG(cc,1) - techshk)  
+
+EQUATION > VI
+EQTYPE > IMPOSED
+EQ > vi =  inv - LAG(inv,1) + techshk 
+
+EQUATION > VP
+EQTYPE > IMPOSED
+EQ > vp = dp - (1-ap)*LAG(dp,1)
+
+EQUATION > VW
+EQTYPE > IMPOSED
+EQ > vw = beta*LEAD(vw,1) + kappaw*(sigmal*lab - lam - realw) 
+
+EQUATION > DW
+EQTYPE > IMPOSED
+EQ > dw = (1-aw)*LAG(dp,1) + (1-bw)*techshk + vw
+
+EQUATION > BC
+EQTYPE > IMPOSED
+EQ > bc = -1/(1-gamtil)*(LEAD(cc,1)+gamtil*(LEAD(techshk,1)-cc))
+
+EQUATION > BI
+EQTYPE > IMPOSED
+EQ > bi = (LEAD(inv,1) - inv + LEAD(techshk,1))
+
+EQUATION > LIQSHOCK
+EQTYPE > IMPOSED
+EQ > liqshk = rholiq*LAG(liqshk,1) + sdevliq*LAG(errliq,1)
+
+EQUATION > INVSHK
+EQTYPE > IMPOSED
+EQ > invshk = rhoinv*LAG(invshk,1) + sdevinv*LAG(errinv,1)
+
+EQUATION > TECHSHK
+EQTYPE > IMPOSED
+EQ > techshk = sdevtech*LAG(errtech,1)
+
+EQUATION > INTSHK
+EQTYPE > IMPOSED
+EQ > intshk = rhoint*LAG(intshk,1) + sdevint*LAG(errint,1)
+
+EQUATION > GSHK
+EQTYPE > IMPOSED
+EQ > gshk = rhog*LAG(gshk,1) + sdevg*LAG(errgshk,1)
+
+EQUATION > ashk
+EQTYPE > IMPOSED
+EQ > ashk = rhoa*LAG(ashk,1) + sdeva*LAG(errashk,1)
+
+EQUATION > ERRLIQ
+EQTYPE > IMPOSED
+EQ > errliq = 0*LAG(errliq,1)
+
+EQUATION > ERRINV
+EQTYPE > IMPOSED
+EQ > errinv = 0*LAG(errinv,1)
+
+EQUATION > ERRTECH
+EQTYPE > IMPOSED
+EQ > errtech = 0*LAG(errtech,1)
+
+EQUATION > ERRINT
+EQTYPE > IMPOSED
+EQ > errint = 0*LAG(errint,1)
+
+EQUATION > ERRGSHK
+EQTYPE > IMPOSED
+EQ > errgshk = 0*LAG(errgshk,1)
+
+EQUATION > ERRASHK
+EQTYPE > IMPOSED
+EQ > errashk = 0*LAG(errashk,1)
+
+END
+
+
