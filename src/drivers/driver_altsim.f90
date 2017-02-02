@@ -53,19 +53,6 @@ program driver_altsim
   call cli%get(switch='--infile',val=in_file)
   call cli%get(switch='--sim',val=sim)
 
-  ! do i = 1, command_argument_count()
-  !    call get_command_argument(i, arg)
-
-  !    select case(arg)
-  !    case('--infile')
-  !       call get_command_argument(i+1,arg)
-  !       in_file = arg
-  !    case('--sim')
-  !       call get_command_argument(i+1,arg)
-  !       sim = arg
-  !    end select
-  ! end do
-
   i0 = index(in_file,'.json')
 
 

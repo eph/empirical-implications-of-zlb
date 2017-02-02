@@ -38,24 +38,21 @@ FLAP=-I$(CONDA)/include/flap -L$(CONDA)/lib -lflap
 SLICOT = -L/mq/home/m1eph00/lib -lslicot_sequential
 
 
+#------------------------------------------------------------
+# compiler flags
+#------------------------------------------------------------
+# for debug FC2 = -g -check all -warn all
+# use -fp-model precise for value-safe optimization of fp calculations (SLOW)
+FC2 = -O3 -nocheck -inline-level=2 -shared-intel -mcmodel=medium -xSSE4.2 -ipo 
+FFLAGS = -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
+CFLAGS = -c -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
+VPATH=src/model:src/temp:src/fortress:src/drivers:src/linear_model:generated_linear_model/base:generated_linear_model/base/amiller
 
 
 LOBJS = rng_serial.o utils.o linear_solution.o polydef.o \
 	model_details.o get_decisionrule.o get_decisionrule_parallel.o \
 	simulate_model.o class_model.o $(MODNAME)_AMA_matrices.o \
 	pdf_fcns.o pdfs.o priorfcn.o inbounds.o
-
-
-#------------------------------------------------------------
-# compiler flags
-#------------------------------------------------------------
-# for debug FC2 = -g -check all -warn all
-# use -fp-model precise for value-safe optimization of fp calculations (SLOW)
-FC2 = -openmp -O3 -nocheck -inline-level=2 -shared-intel -mcmodel=medium -xSSE4.2 -ipo 
-FFLAGS = -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
-CFLAGS = -c -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
-VPATH=src/model:src/temp:src/fortress:src/drivers:src/linear_model:generated_linear_model/base:generated_linear_model/base/amiller
-
 
 
 %.o: %.f90
@@ -100,10 +97,6 @@ rwmh_driver_linear_model: rwmh_driver_linear_model.f90 filter.o gensys.o as63.o 
 
 test_linear_model: test_linear.f90 gensys.o filter.o model_linear.o RandomNumber.o particles.o TemperedParticleFilter.o ParallelParticleFilter.o
 	$(FC) $(FC2) -openmp -mkl  $^ -o test_linear_model $(SLICOT) $(JSON)
-
- smoother_driver: smoother_driver.f90 rng_serial.o linear_solution.o polydef.o model_details.o  utils.o get_decisionrule.o get_decisionrule_parallel.o class_model.o  $(MODNAME)_AMA_matrices.o RandomNumber.o particles.o class_ParticleSmoother.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o 
-	$(FC) $(FC2) $(FOBJS) $(COBJS) -openmp -mkl  $^ -o driver_smoother $(SLICOT) $(JSON)
-
 
 smoother_driver_linear: smoother_driver.f90 gensys.o filter.o as63.o prior.o model_linear.o RandomNumber.o particles.o class_ParticleSmoother.o 
 	$(FC) $(FC2) -openmp -mkl  $^ -o driver_smoother_linear $(SLICOT) $(JSON)

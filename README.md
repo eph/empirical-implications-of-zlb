@@ -1,14 +1,15 @@
-Companion Code for "The Empirical Implications for the Interest-Rate Lower Bound"
----------------------------------------------------------------------------------
-by Christopher Gust,  Matthew Smith, and Ed Herbst
+# Companion Code for "The Empirical Implications for the Interest-Rate Lower Bound"
+### by Christopher Gust,  Matthew Smith, and Ed Herbst
 
 contact: Ed Herbst [edward.p.herbst@frb.gov]
 
 up to date version of this code: http://github.com/eph/empirical-implications-of-zlb
 
-Software Requirements
+## Software Requirements
 ---------------------
-This code was written for linux.  It may be possible to run it on OSX or Windows, I have no idea...
+This code was written for Linux.  It may be possible to run it on OSX or Windows, I have no idea...
+
+To run this code, you need:
 
 1. Intel Fortran (with MKL libraries)
 2. MPICH2 (i.e., a message passing interface with support for `ifort`.)  Infinibad is *highly* recommended.
@@ -51,7 +52,34 @@ Installation + Running
     For example:
 
 
-    Finally, remember when actually running the program to invoke it using MPI.
+    Finally, remember when actually running the program to invoke it using MPI (except `driver_smoother`)
     ```
     mpirun -n NPROCS ./PROGRAM --some arguments 
     ```
+    
+Figures + Table Generation
+--------------------------
+1. Comparison of the posterior
+    * Estimate the linear model: `driver_linear`
+    * Estimate the nonlinear model: `driver_prwmh`
+2. Response to an Exogenous Increase in the Risk Premium
+    * Driver to run: `driver_irfs`
+    * Figure script: `matlab -r "run('matlab/plot_nonlinear_irf.m')"`
+3. Response to a Fall in Investment Efficiency
+    * Driver to run: `driver_irfs -s 2`
+    * Figure script: `matlab -r "run('matlab/plot_nonlinear_irf.m')"`
+4. Smoothed Estimates of Model Objects
+    * Driver to run: `driver_prwmh`
+    * Get 1000 draws from the posterior: `python python/sample_posterior.py`
+    * For each of 1000 draws run: `driver_smoother -p0 results/thinned_posterior/NNNNpara.txt --output-file outputNNNN.json`
+    * Make plot `python python/jfkdlsaf`
+5. Model objects for different values of Measurement Error
+
+6. Distribution of the Probability and Duration of Being at the ZLB
+
+7. The Path of the Estimated Shocks and Equitiy Premium During the Great Recession
+    * Driver to run: `driver_prwmh`
+    * Get 1000 draws from the posterior: `python python/sample_posterior.py`
+    * For each of 1000 draws run: `driver_smoother -p0 results/thinned_posterior/NNNNpara.txt --output-file outputNNNN.json`
+
+8. The Path of the Estimated Technology Shocks
