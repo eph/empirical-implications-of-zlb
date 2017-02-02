@@ -1,13 +1,16 @@
-program ghlss_smoother_driver
+program driver_altsim
 
   use class_model, only: model
 
   use json_module
 
+  use flap
+
   implicit none
 
   include 'mpif.h'
 
+  type(command_line_interface) :: cli
   type(Model) :: dsge
   
   character(len=:), allocatable :: in_file, out_file, sim
@@ -17,7 +20,7 @@ program ghlss_smoother_driver
 
   integer :: nsave
   character(len=500) :: arg, charsimi, charvari, charstate
-  integer :: i, n,j, t, i0
+  integer :: i, n,j, t, i0, error
 
   type(json_core) :: json 
   type(json_value), pointer :: p, inp, output, sim_i, sim_i_s
@@ -36,18 +39,32 @@ program ghlss_smoother_driver
   zlb = .true.
 
   out_file = 'test.json'
-  do i = 1, command_argument_count()
-     call get_command_argument(i, arg)
 
-     select case(arg)
-     case('--infile')
-        call get_command_argument(i+1,arg)
-        in_file = arg
-     case('--sim')
-        call get_command_argument(i+1,arg)
-        sim = arg
-     end select
-  end do
+  call cli%init(progname = 'driver_altsim', &
+       version='0.0.1', &
+       authors='Chris Gust & Ed Herbst', &
+       description='Program for running counterfactuals')
+
+  call cli%add(switch='--infile',required=.true.,def='test.json',help='The JSON file containing a set of filtered/smoothed estimates.')
+  call cli%add(switch='--sim',required=.true.,def='nozlb_2008', &
+       choices='nozlb_2003,nozlb_2008,great_recession_liq,great_recession_inv,great_recession_tech,great_recession_demand,great_recession_mp', &
+       help='The alternative simulation to run.')
+  call cli%parse(error=error)
+  call cli%get(switch='--infile',val=in_file)
+  call cli%get(switch='--sim',val=sim)
+
+  ! do i = 1, command_argument_count()
+  !    call get_command_argument(i, arg)
+
+  !    select case(arg)
+  !    case('--infile')
+  !       call get_command_argument(i+1,arg)
+  !       in_file = arg
+  !    case('--sim')
+  !       call get_command_argument(i+1,arg)
+  !       sim = arg
+  !    end select
+  ! end do
 
   i0 = index(in_file,'.json')
 

@@ -11,9 +11,13 @@
 program driver_irfs
   use utils, only: read_matrix, write_matrix
   use class_model, only: model
+
+  use flap
+
   implicit none
   include 'mpif.h'
 
+  type(command_line_interface) :: cli
   type(model) :: m
   logical, parameter :: parallelswitch = .true.
   integer, parameter :: neulererrors = 18
@@ -24,9 +28,10 @@ program driver_irfs
   double precision, allocatable :: euler_errors(:,:)
   integer :: rank
   integer :: nproc
-  integer :: mpierror
+  integer :: mpierror, error
   character(len=150) :: arg,param_type
   character (len=250) :: filename
+
 
   if (parallelswitch .eq. .true.) then
      call MPI_init(mpierror)
@@ -38,30 +43,19 @@ program driver_irfs
      write(*,*) 'You are running the serial version of the code.'
   end if
 
-  nsim = 5000
-  captirf = 20
-  shockindex = 1  !1=risk premium; 2=MEI; 
-  dsetswitch = 0  !0=mean parameters; otherwise median
-  
-  do i = 1, command_argument_count()
-     call get_command_argument(i, arg)
-     select case(arg)
-     case ('--nsim', '-n')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') nsim
-     case('--capt', '-c')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') captirf
-     case('--shockindex', '-s')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') shockindex
-     case('--dset','-d')
-        call get_command_argument(i+1,arg)
-        read(arg, '(i)') dsetswitch
-     end select
-  end do
-  
-  if ((shockindex .lt. 1) .or. (shockindex .gt. 2)) stop 'shockindex can only be 1 or 2 (driverirf)'
+
+  call cli%init(progname = 'driver_irfs', &
+       authors='Chris Gust & Ed Herbst', &
+       description='Program for computing impulse response functions.')
+  call cli%add(switch='--nsim',switch_ab='-n',required=.false.,def='5000',help='Number of draws for MC integration')
+  call cli%add(switch='--capt',switch_ab='-c',required=.false.,def='20',help='Length of IRF')
+  call cli%add(switch='--shockindex',switch_ab='-s',required=.false.,def='1',choices='1,2',help='Shock: (1) Risk Premium; (2) MEI')
+  call cli%add(switch='--dsetswitch',switch_ab='-d',required=.false.,def='0',choices='0,1',help='Parameters: (0) Mean; (1) Medium')
+  call cli%parse(error=error)
+  call cli%get(switch='-n',val=nsim)
+  call cli%get(switch='-c',val=captirf)
+  call cli%get(switch='-s',val=shockindex)
+  call cli%get(switch='-d',val=dsetswitch)
   
   !iniitialize solution details
   zlbswitch = .true.
@@ -86,7 +80,7 @@ program driver_irfs
   else
      param_type = 'median'
   end if
-  filename = '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/final-final/' // trim(param_type) //  '.txt'
+  filename = 'input/' // trim(param_type) //  '.txt'
   call read_matrix(filename,m%solution%poly%nparams,1,m%params)
 
   !solve model
@@ -104,14 +98,14 @@ program driver_irfs
         call m%simulate_modelirfs(captirf,nsim,shockindex,endogirf,linirf,euler_errors,neulererrors)
         !send irfs to disk
         if (zlbswitch .eq. .true.) then
-           write(filename,"(A,I0,A)") './irf-results/nonlinearirf_' // trim(param_type) // '_', shockindex , '.txt'
+           write(filename,"(A,I0,A)") 'results/irf/nonlinearirf_' // trim(param_type) // '_', shockindex , '.txt'
         else
-           write(filename,"(A,I0,A)") './irf-results/nonlinearirf_unc_' // trim(param_type) // '_', shockindex , '.txt'
+           write(filename,"(A,I0,A)") 'results/irf/nonlinearirf_unc_' // trim(param_type) // '_', shockindex , '.txt'
         end if
         call write_matrix(filename,m%solution%poly%nvars+m%solution%poly%nexog+2,captirf,endogirf)    
-        write(filename,"(A,I0,A)") './irf-results/linearirf_' // trim(param_type) // '_', shockindex , '.txt'
+        write(filename,"(A,I0,A)") 'results/irf/linearirf_' // trim(param_type) // '_', shockindex , '.txt'
         call write_matrix(filename,m%solution%poly%nvars+m%solution%poly%nexog+2,captirf,linirf) 
-        write(filename,"(A,I0,A)") './irf-results/eulers_' // trim(param_type) // '_', shockindex, '.txt'
+        write(filename,"(A,I0,A)") 'results/irf/eulers_' // trim(param_type) // '_', shockindex, '.txt'
         call write_matrix(filename,2*neulererrors,captirf,euler_errors)    
      end if
   end if

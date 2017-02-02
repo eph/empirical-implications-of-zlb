@@ -1,6 +1,6 @@
 program ghlss_rwmh_driver
 
-  !use flap, only : command_line_interface
+  use flap, only : command_line_interface
   use class_model, only: model
   use class_ParallelParticleFilter, only: ParallelParticleFilter
   use class_RandomNumber, only: RandomNumber
@@ -11,7 +11,7 @@ program ghlss_rwmh_driver
 
   include 'mpif.h'
 
-  !type(command_line_interface) :: cli
+  type(command_line_interface) :: cli
   integer :: error
 
   character(len=400) :: arg     ! get_command_argument needs an allocated character array
@@ -54,35 +54,64 @@ program ghlss_rwmh_driver
   trial = 1
   npart = 1500000
 
-  do i = 1, command_argument_count()
-     call get_command_argument(i, arg)
-     select case(arg)
-     case ('--starting-value-file', '-p0')
-        call get_command_argument(i+1, arg)
-        pmsv_file = arg
-     case ('--covariance-file', '-M')
-        call get_command_argument(i+1, arg)
-        cov_file = arg
-     case ('--prior-file', '-pr')
-        call get_command_argument(i+1, arg)
-        prior_file = arg
-     case ('--nsim', '-n')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') nsim
-     case('--scaling', '-c')
-        call get_command_argument(i+1, arg)
-        read(arg, '(f)') c
-     case('--seed', '-s')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') seed
-     case('--trial','-i')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') trial
-     end select
-  end do
+  call cli%init(progname = 'driver_prwmh', &
+       version='0.0.1', &
+       authors='Chris Gust & Ed Herbst', &
+       description='Program for estimating model via particle MCMC')
+  call cli%add(switch='--p0', switch_ab='-p0', required=.false., def='inputs/case-0/pmsv00.txt')
+  call cli%add(switch='--covariance', switch_ab='-H', required=.false., def='inputs/case-0/cholesky_extended.txt',help='Cholesky of covariance for proposal innvoations')
+  call cli%add(switch='--prior-file', required=.false., def='inputs/case-0/prior.txt',help='Prior file')
+  call cli%add(switch='--scaling',switch_ab='-c', required=.false., def='0.08',help='scaling of innovation')
+  call cli%add(switch='--nsim', switch_ab='-n', required=.false., def='50000', help='Length of MCMC chain')
+  call cli%add(switch='--npart', required=.false., def='1500000',help='Number of Particles for PF')
+  call cli%add(switch='--zlb', required=.false., def='.false.',choices='.false.,.true.',help='Impose ZLB')
+  call cli%add(switch='--output-file', required=.false., def='output.json',help='Output file')
+  call cli%add(switch='--seed', required=.false., def='1848',help='Seed for RNG')
+
+  call cli%parse(error=error)
+  call cli%get(switch='--zlb', val=zlb)
+  call cli%get(switch='-H', val=cov_file)
+  call cli%get(switch='--npart', val=npart)
+  call cli%get(switch='--nsim', val=nsim)
+  call cli%get(switch='--seed', val=seed)
+  call cli%get(switch='--scaling', val=c)
+  !call cli%get(switch='--output-file', val=output_file)
+  call cli%get(switch='--p0', val=pmsv_file)
+  !call cli%get(switch='--prior-file', val=prior_file)
 
 
-  dsge = model(.true.)
+
+
+
+  ! do i = 1, command_argument_count()
+  !    call get_command_argument(i, arg)
+  !    select case(arg)
+  !    case ('--starting-value-file', '-p0')
+  !       call get_command_argument(i+1, arg)
+  !       pmsv_file = arg
+  !    case ('--covariance-file', '-M')
+  !       call get_command_argument(i+1, arg)
+  !       cov_file = arg
+  !    case ('--prior-file', '-pr')
+  !       call get_command_argument(i+1, arg)
+  !       prior_file = arg
+  !    case ('--nsim', '-n')
+  !       call get_command_argument(i+1, arg)
+  !       read(arg, '(i)') nsim
+  !    case('--scaling', '-c')
+  !       call get_command_argument(i+1, arg)
+  !       read(arg, '(f)') c
+  !    case('--seed', '-s')
+  !       call get_command_argument(i+1, arg)
+  !       read(arg, '(i)') seed
+  !    case('--trial','-i')
+  !       call get_command_argument(i+1, arg)
+  !       read(arg, '(i)') trial
+  !    end select
+  ! end do
+
+
+  dsge = model(zlb)
 
   allocate(parasim(dsge%npara, nsim), acptsim(nsim), postsim(nsim))
   allocate(p0(dsge%npara), p1(dsge%npara), M(dsge%npara,dsge%npara), diag_M(dsge%npara))
@@ -133,16 +162,9 @@ program ghlss_rwmh_driver
    M(43,:) = 0.0d0
 
    ppf = ParallelParticleFilter(dsge, npart=npart, nproc=nproc, rank=rank, seed=rank)
-   
    ppf%adjusted_proposal(104) = .true.
    ppf%adjusted_proposal_std(104) = 1.2d0
    ppf%adjusted_proposal_mu(104,1) = 3.0d0
-
-!   p0(37) = 0.57d0 * p0(37)
-!   p0(38) = 0.57d0 * p0(38)
-!   p0(39) = 0.57d0 * p0(39)
-!   p0(42) = 0.57d0 * p0(42)
-!   p0(43) = 0.57d0 * p0(43)
 
    lik0 = ppf%lik(p0, rank=rank, nproc=nproc)
    pr0 = dsge%pr(p0)

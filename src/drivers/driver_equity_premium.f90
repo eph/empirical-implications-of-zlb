@@ -5,10 +5,13 @@ program ghlss_smoother_driver
 
   use json_module
 
+  use flap
+
   implicit none
 
   include 'mpif.h'
 
+  type(command_line_interface) :: cli
   type(Model) :: dsge
   
   character(len=:), allocatable :: in_file, out_file, sim
@@ -18,7 +21,7 @@ program ghlss_smoother_driver
 
   integer :: nsave
   character(len=500) :: arg, charsimi, charvari, charstate
-  integer :: i, n,j, t, i0
+  integer :: i, n,j, t, i0, error
 
   type(json_core) :: json 
   type(json_value), pointer :: p, inp, output, sim_i, sim_i_s
@@ -34,21 +37,17 @@ program ghlss_smoother_driver
   call mpi_comm_rank(MPI_COMM_WORLD, rank, mpierror)
 
 
+  call cli%init(progname = 'driver_smoother', &
+       version='0.0.1', &
+       authors='Chris Gust & Ed Herbst & Matt Smith', &
+       description='Computes the equity premium given a set of filtered estimates.')
+
+  call cli%add(switch='--infile',required=.true.,help='The JSON file containing a set of filtered/smoothed estimates.')o
+  call cli%add(switch='--sim',required=.true.,help='The alt simulation name')
+  call cli%parse(error=error)
+  call cli%get(switch='--infile',val=in_file)
+  call cli%get(switch='--sim',val=sim)
   zlb = .true.
-
-  out_file = 'test.json'
-  do i = 1, command_argument_count()
-     call get_command_argument(i, arg)
-
-     select case(arg)
-     case('--infile')
-        call get_command_argument(i+1,arg)
-        in_file = arg
-     case('--sim')
-        call get_command_argument(i+1,arg)
-        sim = arg
-     end select
-  end do
 
   i0 = index(in_file,'.json')
 

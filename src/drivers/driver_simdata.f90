@@ -11,9 +11,12 @@
 program driver_simdata
   use utils, only: read_matrix, write_matrix
   use class_model, only: model
+
+  use flap
   implicit none
   include 'mpif.h'
 
+  type(command_line_interface) :: cli
   type(model) :: m
   logical, parameter :: parallelswitch = .true.
   integer :: capt_simdata,ndsets
@@ -23,9 +26,10 @@ program driver_simdata
   double precision, allocatable :: modeldata(:,:)
   integer :: rank
   integer :: nproc
-  integer :: mpierror
+  integer :: mpierror,error
   character(len=150) :: arg
   character (len=250) :: filename
+
 
   if (parallelswitch .eq. .true.) then
      call MPI_init(mpierror)
@@ -37,24 +41,18 @@ program driver_simdata
      write(*,*) 'You are running the serial version of the code.'
   end if
 
-  capt_simdata = 1000
-  ndsets = 1
-  modelindex = 0
+  call cli%init(progname = 'driver_simdata', &
+       authors='Chris Gust & Ed Herbst', &
+       description='Program for simulating data from the model.')
 
-  do i = 1, command_argument_count()
-     call get_command_argument(i, arg)
-     select case(arg)
-     case ('--ndsets', '-n')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') ndsets
-     case('--capt', '-c')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') capt_simdata
-     case('--model','-m')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') modelindex
-     end select
-  end do
+  call cli%add(switch='--ndsets', switch_ab='-n',required=.false.,def='1',help='Number of dsets')
+  call cli%add(switch='--capt', switch_ab='-c',required=.false.,def='1000', help='Simulation Length')
+  call cli%add(switch='--model',switch_ab='-m',required=.false.,def='0',choices='0,1',help='Model: (0) ZLB; (1) NOZLB')
+  call cli%parse(error=error)
+  call cli%get(switch='-n',val=ndsets)
+  call cli%get(switch='-c',val=capt_simdata)
+  call cli%get(switch='-m',val=modelindex)
+
 
   !iniitialize solution details
   if (modelindex .eq. 0) then
@@ -78,7 +76,8 @@ program driver_simdata
   do id = 1,ndsets
 
      !get parameters from disk
-     write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/final-final/by-draw/parasim', id-1 , '.txt'
+     !write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/final-final/by-draw/parasim', id-1 , '.txt'
+     filename = 'input/mean.txt'
      call read_matrix(filename,m%solution%poly%nparams,1,m%params)
  
      !solve model
@@ -93,13 +92,13 @@ program driver_simdata
            write(*,*) 'Failed to converge for parameters when id = ', id
            write(*,*) '----------------------------------'
            if (modelindex .eq. 0) then
-              write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/final-final/zlbstat-results/modeldata_file', id-1 , '.txt'
+              write(filename,"(A,I4.4,A)") 'results/zlbstat/modeldata_file', id-1 , '.txt'
            else
-              write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/final-final/zlbstat-results/modeldata_unc_file', id-1 , '.txt'
+              write(filename,"(A,I4.4,A)") 'results/zlbstat/modeldata_unc_file', id-1 , '.txt'
            end if
            call write_matrix(filename,1,1,dum)
            if (modelindex .eq. 0) then
-              write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/final-final/zlbstat-results/modeldata_linear_file', id-1 , '.txt'
+              write(filename,"(A,I4.4,A)") 'results/zlbstat/modeldata_linear_file', id-1 , '.txt'
               call write_matrix(filename,1,1,dum)
            end if
 
@@ -113,15 +112,15 @@ program driver_simdata
            nonlinearswitch = .true.
            call m%simulate_modeldata(capt_simdata,nonlinearswitch,modeldata,seed=1221+id)
            if (modelindex .eq. 0) then
-              write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/zlbstat-results/modeldata_file', id-1 , '.txt'
+              write(filename,"(A,I4.4,A)") 'results/zlbstat/modeldata_file', id-1 , '.txt'
            else
-              write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/zlbstat-results/modeldata_unc_file', id-1 , '.txt'
+              write(filename,"(A,I4.4,A)") 'results/zlbstat/modeldata_unc_file', id-1 , '.txt'
            end if
            call write_matrix(filename,m%solution%poly%nvars+2*m%solution%poly%nexog,capt_simdata,modeldata)  
            if (modelindex .eq. 0) then
               nonlinearswitch = .false.
               call m%simulate_modeldata(capt_simdata,nonlinearswitch,modeldata,seed=1221+id)
-              write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/zlbstat-results/modeldata_linear_file', id-1 , '.txt'
+              write(filename,"(A,I4.4,A)") 'results/zlbstat/modeldata_linear_file', id-1 , '.txt'
               call write_matrix(filename,m%solution%poly%nvars+2*m%solution%poly%nexog,capt_simdata,modeldata) 
            end if
         end if

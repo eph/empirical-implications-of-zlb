@@ -12,21 +12,36 @@ program driver_simdata
   use utils, only: read_matrix, write_matrix
   use class_model, only: model
   use simulate_model, only: compute_zlbstats
+
+  use flap 
+
   implicit none
   include 'mpif.h'
 
+  type(command_line_interface) :: cli
   type(model) :: m
   logical, parameter :: parallelswitch = .false.
-  integer :: capt_simdata,ndsets
+  integer :: capt_simdata,ndsets,modelindex
   integer :: i,id,ndsets_used
   logical :: nonlinearswitch,zlbswitch,convergence
   double precision :: dum(1)
   double precision, allocatable :: modeldata(:,:)
   integer :: rank
   integer :: nproc
-  integer :: mpierror
+  integer :: mpierror, error
   character(len=150) :: arg
   character (len=250) :: filename
+
+  call cli%init(progname = 'driver_selectmoments', &
+       authors='Chris Gust & Ed Herbst', &
+       description='Program for computing ZLB probabilities and durations from simulated data.')
+  call cli%add(switch='--ndsets', switch_ab='-n',required=.false.,def='1',help='Number of dsets')
+  call cli%add(switch='--capt', switch_ab='-c',required=.false.,def='1000', help='Simulation Length')
+  call cli%add(switch='--model',switch_ab='-m',required=.false.,def='0',choices='0,1',help='Model: (0) ZLB; (1) NOZLB')
+  call cli%parse(error=error)
+  call cli%get(switch='-n',val=ndsets)
+  call cli%get(switch='-c',val=capt_simdata)
+  call cli%get(switch='-m',val=modelindex)
 
   if (parallelswitch .eq. .true.) then
      call MPI_init(mpierror)
@@ -37,25 +52,6 @@ program driver_simdata
      rank = 0
      write(*,*) 'You are running the serial version of the code.'
   end if
-
-  capt_simdata = 1000
-  ndsets = 1
-  modelindex = 0
-
-  do i = 1, command_argument_count()
-     call get_command_argument(i, arg)
-     select case(arg)
-     case ('--ndsets', '-n')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') ndsets
-     case('--capt', '-c')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') capt_simdata
-     case('--model','-m')
-        call get_command_argument(i+1, arg)
-        read(arg, '(i)') modelindex
-     end select
-  end do
 
   !iniitialize solution details
   if (modelindex .eq. 0) then

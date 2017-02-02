@@ -3,7 +3,7 @@
 ## Description: 
 ## 
 ## Author: Ed Herbst [edward.p.herbst@frb.gov]
-## Last-Updated: 02/01/17
+## Last-Updated: 02/02/17
 ## 
 
 #------------------------------------------------------------
@@ -17,6 +17,7 @@ LINK = mpif90 -f90=ifort
 #------------------------------------------------------------
 # external fortran libraries
 #------------------------------------------------------------ 
+CONDA=$(HOME)/miniconda2/envs/ifort
 # sparseAMA
 SPAMADIR=/msu/home/m1cjg01/research/aer_revision_code/Fortran/sparseAMAViaModelEZ/sparseAMA
 FOBJS = $(patsubst %.f,%.o,$(wildcard $(SPAMADIR)/src/main/fortran/*.f))
@@ -25,8 +26,13 @@ COBJS = $(patsubst %.c,%.o,$(wildcard $(SPAMADIR)/src/main/c/*.c))
 MODNAME=modelv5_2
 
 
+
 # json-fortran
-JSON =  -I/mq/home/m1eph00/tmp/json-fortran/lib -L/mq/home/m1eph00/lib/ -ljsonfortran
+JSON=-I$(CONDA)/include/json-fortran -L$(CONDA)/lib/json-fortran -ljsonfortran
+
+# FLAP
+
+FLAP=-I$(CONDA)/include/flap -L$(CONDA)/lib -lflap
 
 # SLICOT
 SLICOT = -L/mq/home/m1eph00/lib -lslicot_sequential
@@ -34,8 +40,10 @@ SLICOT = -L/mq/home/m1eph00/lib -lslicot_sequential
 
 
 
-LOBJS = rng_serial.o utils.o linear_solution.o polydef.o model_details.o get_decisionrule.o get_decisionrule_parallel.o  class_model.o driver.o $(MODNAME)_AMA_matrices.o
-LOBJS2 = rng_serial.o utils.o linear_solution.o polydef.o model_details.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o class_model.o driver2.o $(MODNAME)_AMA_matrices.o
+LOBJS = rng_serial.o utils.o linear_solution.o polydef.o \
+	model_details.o get_decisionrule.o get_decisionrule_parallel.o \
+	simulate_model.o class_model.o $(MODNAME)_AMA_matrices.o \
+	pdf_fcns.o pdfs.o priorfcn.o inbounds.o
 
 
 #------------------------------------------------------------
@@ -54,23 +62,28 @@ VPATH=src/model:src/temp:src/fortress:src/drivers:src/linear_model:generated_lin
 	$(FC) $(FC2) -mkl -c  $<
 
 $(MODNAME)_AMA_matrices.o : $(MODNAME)_AMA_matrices.c
-	$(CC)  $(CFLAGS) -c $< -I$(SPAMADIR)/src/main/include -shared -fPIC -ipo 
+	$(CC) -shared -fPIC -ipo  $(CFLAGS) -c $< -I$(SPAMADIR)/src/main/include 
 
-# DRIVERS
-rundriver: $(LOBJS) $(FOBJS) $(COBJS)
-	$(LINK) $(FC2) -mkl $(LOBJS) $(FOBJS) $(COBJS)  -lm $(LAPACKLIBS) -o rundriver
+driver_irfs: $(LOBJS) driver_irfs.f90 
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_irfs
 
-rundriver_irfs: driver_irfs.f90 rng_serial.o linear_solution.o polydef.o model_details.o utils.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o class_model.o $(MODNAME)_AMA_matrices.o 
-	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o rundriver_irfs
+driver_simdata: $(LOBJS) driver_simdata.f90
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_simdata
 
-rundriver_zlbstats: driver_zlbstats.f90 rng_serial.o linear_solution.o polydef.o model_details.o utils.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o class_model.o $(MODNAME)_AMA_matrices.o 
-	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o rundriver_zlbstats
+driver_selectmoments: $(LOBJS) driver_selectmoments.f90
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_selectmoments
 
-rundriver_simdata: driver_simdata.f90 rng_serial.o linear_solution.o polydef.o model_details.o utils.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o class_model.o $(MODNAME)_AMA_matrices.o 
-	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o rundriver_simdata
+driver_prwmh: $(LOBJS) RandomNumber.o particles.o ParallelParticleFilter.o driver_prwmh.f90
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP)  -mkl $^ -o driver_prwmh $(JSON)
 
-driver_altsim: driver_altsim.f90 rng_serial.o linear_solution.o polydef.o model_details.o  utils.o get_decisionrule.o get_decisionrule_parallel.o class_model.o  $(MODNAME)_AMA_matrices.o RandomNumber.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o simulate_model.o
-	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o driver_altsim $(JSON)
+driver_smoother: $(LOBJS) RandomNumber.o particles.o class_ParticleSmoother.o driver_smoother.f90
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP)  -mkl $^ -o driver_smoother $(JSON)
+
+driver_equity_premium : $(LOBJS) driver_equity_premium.f90
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_equity_premium $(JSON)
+
+driver_altsim: $(LOBJS) driver_altsim.f90
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_altsim $(JSON)
 
 driver_nomr: driver_nomr.f90 rng_serial.o linear_solution.o polydef.o model_details_laggedactual.o  utils.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o class_model.o  $(MODNAME)_AMA_matrices.o RandomNumber.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o 
 	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o driver_nomr $(JSON)
@@ -78,8 +91,6 @@ driver_nomr: driver_nomr.f90 rng_serial.o linear_solution.o polydef.o model_deta
 
 .PHONY : rwmh_driver 
 
-rwmh_driver: prwmh_driver.f90 rng_serial.o linear_solution.o polydef.o model_details.o  utils.o get_decisionrule.o get_decisionrule_parallel.o class_model.o  simulate_model.o $(MODNAME)_AMA_matrices.o RandomNumber.o particles.o ParallelParticleFilter.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o TemperedParticleFilter.o
-	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o rwmh_driver $(JSON)
 
 driver_rhoeta: driver_rhoeta.f90 rng_serial.o linear_solution.o polydef.o model_details.o  utils.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o class_model.o  $(MODNAME)_AMA_matrices.o RandomNumber.o particles.o ParallelParticleFilter.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o TemperedParticleFilter.o
 	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o driver_rhoeta $(JSON)
@@ -96,20 +107,6 @@ test_linear_model: test_linear.f90 gensys.o filter.o model_linear.o RandomNumber
 
 smoother_driver_linear: smoother_driver.f90 gensys.o filter.o as63.o prior.o model_linear.o RandomNumber.o particles.o class_ParticleSmoother.o 
 	$(FC) $(FC2) -openmp -mkl  $^ -o driver_smoother_linear $(SLICOT) $(JSON)
-
-
-.PHONY : linear_model 
-
-linear_model:
-	rm -rf generated_linear_model
-	python python/create_linear_model.py
-	cd generated_linear_model && make smc_driver_mpi
-
-.PHONY: estimate_linear_model
-estimate_linear_model: linear_model
-	echo "cd generated_linear_model && tmpiexec -n 12 ./smc_model_v5_2_linear" > ~/tmp/run.txt
-	qsub -l procs=12 ~/tmp/run.txt
-
 
 clean:	
 	rm -f $(LOBJS) 
