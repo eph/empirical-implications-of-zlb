@@ -3,7 +3,7 @@
 ## Description: 
 ## 
 ## Author: Ed Herbst [edward.p.herbst@frb.gov]
-## Last-Updated: 02/02/17
+## Last-Updated: 02/03/17
 ## 
 
 #------------------------------------------------------------
@@ -84,22 +84,6 @@ driver_altsim: $(LOBJS) driver_altsim.f90
 
 driver_nomr: driver_nomr.f90 rng_serial.o linear_solution.o polydef.o model_details_laggedactual.o  utils.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o class_model.o  $(MODNAME)_AMA_matrices.o RandomNumber.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o 
 	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o driver_nomr $(JSON)
-
-
-.PHONY : rwmh_driver 
-
-
-driver_rhoeta: driver_rhoeta.f90 rng_serial.o linear_solution.o polydef.o model_details.o  utils.o get_decisionrule.o get_decisionrule_parallel.o simulate_model.o class_model.o  $(MODNAME)_AMA_matrices.o RandomNumber.o particles.o ParallelParticleFilter.o pdf_fcns.o pdfs.o priorfcn.o inbounds.o TemperedParticleFilter.o
-	$(FC) $(FC2) $(FOBJS) $(COBJS) -mkl $^ -o driver_rhoeta $(JSON)
-
-rwmh_driver_linear_model: rwmh_driver_linear_model.f90 filter.o gensys.o as63.o prior.o model_linear.o RandomNumber.o particles.o ParallelParticleFilter.o pdf_fcns.o 
-	$(FC) $(FC2) -mkl $^ -o rwmh_driver_linear_model $(SLICOT) $(JSON)
-
-test_linear_model: test_linear.f90 gensys.o filter.o model_linear.o RandomNumber.o particles.o TemperedParticleFilter.o ParallelParticleFilter.o
-	$(FC) $(FC2) -openmp -mkl  $^ -o test_linear_model $(SLICOT) $(JSON)
-
-smoother_driver_linear: smoother_driver.f90 gensys.o filter.o as63.o prior.o model_linear.o RandomNumber.o particles.o class_ParticleSmoother.o 
-	$(FC) $(FC2) -openmp -mkl  $^ -o driver_smoother_linear $(SLICOT) $(JSON)
 
 clean:	
 	rm -f $(LOBJS) 
