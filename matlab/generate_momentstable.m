@@ -55,15 +55,15 @@ countdsets = 0;
 for k = 1:ndraws
     
     %parameter values from disk
-    file = strcat('./final-final/by-draw/parasim',num2str(k-1,'%04d'),'.txt');
+    file = strcat('./results/thinned_posterior/parasim',num2str(k-1,'%04d'),'.txt');
     paramdata = load(file);
     
     if (modelswitch == 0) 
-        file = strcat('./zlbstat-results/modeldata_file',num2str(k-1,'%04d'),'.txt');
+        file = strcat('./simdata/modeldata_file',num2str(k-1,'%04d'),'.txt');
     elseif (modelswitch == 1)
-        file = strcat('./zlbstat-results/modeldata_unc_file',num2str(k-1,'%04d'),'.txt');
+        file = strcat('./simdata/modeldata_unc_file',num2str(k-1,'%04d'),'.txt');
     else
-        file = strcat('./zlbstat-results/modeldata_linear_file',num2str(k-1,'%04d'),'.txt');
+        file = strcat('./simdata/modeldata_linear_file',num2str(k-1,'%04d'),'.txt');
     end
     
     

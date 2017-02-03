@@ -15,6 +15,71 @@ glss_names = ['beta','pibar','gz','psil','gamma','sigmal','phi','phiw',
 
 
 
+def from_matt(df):
+    """Converts Matt's to my parameterization"""
+    df['beta_tr'] = 100*(df['beta']**-1 - 1)
+    df['pibar_tr'] = 100*(df['pibar'] - 1)
+    df['gz_tr'] = 100*np.log(df['gz'])
+  
+    df['aw_tr'] =  1-df['aw']
+    df['ap_tr'] =  1-df['ap']
+    df['bw'] =  df['aw']
+    df['sdevliq_tr'] =   df['sdevliq'] * 100.0
+    df['sdevinv_tr'] =   df['sdevinv'] * 100.0
+    df['sdevtech_tr'] =  df['sdevtech'] * 100.0
+    df['sdevint_tr'] =  df['sdevint'] * 100.0
+    df['sdevg_tr'] =  df['sdevg'] * 100.0
+    df['sdevelast_tr'] =  df['sdevelast'] * 100.0
+    df['sdevelastw_tr'] =  df['sdevelastw'] * 100.0
+
+    return df
+
+
+def to_matt(df):
+    """Convert's my parameterization to Matt's"""
+    df['gz'] = np.exp(df['gz_tr']/100.0)
+    df['delta'] = 0.025
+    df['shrgy'] = 0.2
+    df['rholiq'] = 0.85
+    df['ep_tr'] = 0.20
+    df['epw_tr'] = 0.20
+    df['rhoint'] = 0.0
+
+    df['rhoelast'] =  0.0
+    df['sdevelast_tr'] =   0.0
+    df['rhoelastw'] =   0.0
+    df['sdevelastw_tr'] =  0.0
+
+    df['lamhp'] =  1600.00000000
+    df['psil'] =  1.00000000
+    df['beta'] =  1.0/(df['beta_tr']/100.0 + 1.0)
+    df['pibar'] =  1.0/100*df['pibar_tr'] + 1
+    df['ep'] =  (1.0+df['ep_tr'])/df['ep_tr']
+    df['epw'] =  (1.0+df['epw_tr'])/df['epw_tr']
+    df['aw'] =  1-df['aw_tr']
+    df['ap'] =  1-df['ap_tr']
+    df['bw'] =  df['aw']
+    df['sdevliq'] =   df['sdevliq_tr'] / 100.0
+    df['sdevinv'] =   df['sdevinv_tr'] / 100.0
+    df['sdevtech'] =  df['sdevtech_tr'] / 100.0
+    df['sdevint'] =  df['sdevint_tr'] / 100.0
+    df['sdevg'] =  df['sdevg_tr'] / 100.0
+    df['sdevelast'] =  df['sdevelast_tr'] / 100.0
+    df['sdevelastw'] =  df['sdevelastw_tr'] / 100.0
+
+    df['meas_ygr']= 0.00128825 * 2.5
+    df['meas_cgr']= 0.00102312 * 2.5
+    df['meas_igr']= 0.00485487 * 2.5
+    df['meas_lab']= 0.0
+    df['meas_wgr']= 0.0 
+    df['meas_infl']= 0.0004877 * 2.5
+    df['meas_nomr']= 0.0014285 * 2.5
+
+    df['rholiq'] = 0.85
+
+    return df
+
+
 sim_dir = 'results/by-draw/'
 
 #from tqdm import tqdm
@@ -22,8 +87,6 @@ sim_dir = 'results/by-draw/'
 import json
 
 def load_simulation(date_index=date_index, sim_dir=sim_dir):
-    # Read in output0000.json
-    #output = p.read_json(sim_dir+'output0000.json')
     def load_sim_i(i=0):
 
         ofile = sim_dir+'output{:04d}.json'.format(i)

@@ -14,9 +14,8 @@ program ghlss_rwmh_driver
   type(command_line_interface) :: cli
   integer :: error
 
-  character(len=400) :: arg     ! get_command_argument needs an allocated character array
   character(len=400) :: pmsv_file, cov_file, prior_file
-  character(len=400) :: output_dir
+  character(len=400) :: output_dir, output_file, tmp_file
   integer :: nsim, trial, npart
 
   double precision :: c, lik0, lik1, pr0, pr1, alp
@@ -32,7 +31,7 @@ program ghlss_rwmh_driver
 
   logical :: convergence, zlb
 
-  integer :: rank, nproc, mpierror, i , seed, acpt, j
+  integer :: rank, nproc, mpierror, i , seed, acpt, j, suffix
 
   integer :: time0, time1, rate
 
@@ -44,24 +43,15 @@ program ghlss_rwmh_driver
 
   call system_clock(count_rate=rate)
 
-  nsim = 50000
-  pmsv_file = 'none'
-  cov_file = '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/low-me/para_var_mcmc.txt'
-  output_dir = 'final-final/'
-  prior_file = ''
-  c = 0.15d0
-  seed = 1848
-  trial = 1
-  npart = 1500000
 
   call cli%init(progname = 'driver_prwmh', &
        version='0.0.1', &
        authors='Chris Gust & Ed Herbst', &
        description='Program for estimating model via particle MCMC')
-  call cli%add(switch='--p0', switch_ab='-p0', required=.false., def='input/mean.txt')
-  call cli%add(switch='--covariance', switch_ab='-H', required=.false., def='inputs/case-0/cholesky_extended.txt',help='Cholesky of covariance for proposal innvoations')
+  call cli%add(switch='--p0', switch_ab='-p0', required=.false., def='input/mean.txt',help='starting value')
+  call cli%add(switch='--covariance', switch_ab='-H', required=.false., def='input/cholM.txt',help='Cholesky of covariance for proposal innvoations')
   call cli%add(switch='--prior-file', required=.false., def='inputs/case-0/prior.txt',help='Prior file')
-  call cli%add(switch='--scaling',switch_ab='-c', required=.false., def='0.08',help='scaling of innovation')
+  call cli%add(switch='--scaling',switch_ab='-c', required=.false., def='0.15',help='scaling of innovation')
   call cli%add(switch='--nsim', switch_ab='-n', required=.false., def='50000', help='Length of MCMC chain')
   call cli%add(switch='--npart', required=.false., def='1500000',help='Number of Particles for PF')
   call cli%add(switch='--zlb', required=.false., def='.true.',help='Impose ZLB')
@@ -75,7 +65,7 @@ program ghlss_rwmh_driver
   call cli%get(switch='--nsim', val=nsim)
   call cli%get(switch='--seed', val=seed)
   call cli%get(switch='--scaling', val=c)
-  !call cli%get(switch='--output-file', val=output_file)
+  call cli%get(switch='--output-file', val=output_file)
   call cli%get(switch='--p0', val=pmsv_file)
   !call cli%get(switch='--prior-file', val=prior_file)
 
@@ -102,6 +92,7 @@ program ghlss_rwmh_driver
   end do
   close(199)
 
+  ! zero out the fixed parameters
    !M(1,:) = 0.0d0
    !M(2,:) = 0.0d0
    M(4,:) = 0.0d0
@@ -115,7 +106,7 @@ program ghlss_rwmh_driver
    M(23,:) = 0.0d0
    !M(21,:) = 0.0d0
    !M(22,:) = 0.0d0
-   M(28,:) = M(28,:)/10.0d0
+   !M(28,:) = M(28,:)/10.0d0
    M(29,:) = 0.00d0
    M(31,:) = 0.00d0
    M(33,:) = 0.0d0
@@ -155,9 +146,15 @@ program ghlss_rwmh_driver
    end if
 
 
+  suffix = index(output_file, '.json')
+  tmp_file = output_file(1:suffix-1)//'_para_tmp.txt'
+
+
+
+
    random_number = RandomNumber(seed=seed)
    if (rank==0) print*,'Initial Log Likelihood:', lik0
-   if (rank==0) open(1, file=output_dir//'/parasim_final_03.txt', action='write')
+   if (rank==0) open(1, file=tmp_file, action='write')
 
    allocate(eps(dsge%npara, nsim), u(nsim,1))
    eps = random_number%norm_rvs(dsge%npara, nsim)
@@ -217,11 +214,17 @@ program ghlss_rwmh_driver
      call json%create_object(output, 'output')
      call json%add(p, output)
 
-     !call json%add(output, 'parasim', parasim)
+
      call json%add(output, 'postsim', postsim)
+     call json%add(output, inp)
+     do i = 1, dsge%npara
+        write(tmp_file, '(I2.2)') i
+        call json%add(inp, 'para.'//trim(tmp_file), parasim(i,:))
+     end do
+
      !call json%add(output, 'parasim_file', output_dir//'/parasim1.txt')
      nullify(output)
-     call json%print(p, output_dir//'/output_final_3.json')
+     call json%print(p, output_file)
   call json%destroy(p)
   end if
 

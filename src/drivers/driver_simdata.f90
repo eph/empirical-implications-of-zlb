@@ -76,7 +76,7 @@ program driver_simdata
   do id = 1,ndsets
 
      !get parameters from disk
-     !write(filename,"(A,I4.4,A)") '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/final-final/by-draw/parasim', id-1 , '.txt'
+     !write(filename,"(A,I4.4,A)") 'results/thinned_posterior/parasim', id-1 , '.txt'
      filename = 'input/mean.txt'
      call read_matrix(filename,m%solution%poly%nparams,1,m%params)
  
