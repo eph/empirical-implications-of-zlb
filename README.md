@@ -53,80 +53,40 @@ To run this code, you need:
 
     For example:
 	```
-	(ifort) m1eph00@peaklx12a:/msu/res5/Shared_Projects/zlb-replication-code$ ./driver_prwmh --help
-
+	eherbst@thnkpd:$ ./driver_prwmh --help
 usage: driver_prwmh  [--p0 value] [--covariance value] [--prior-file value] [--scaling value] [--nsim value] [--npart value] [--zlb value] [--output-file value] [--seed value] [--help] [--version]
 
- 
-
 Program for estimating model via particle MCMC
-
- 
-
  
 
 Optional switches:
-
    --p0 value, -p0 value
-
     default value input/mean.txt
-
     starting value
-
    --covariance value, -H value
-
     default value input/cholM.txt
-
     Cholesky of covariance for proposal innvoations
-
-   --prior-file value
-
-    default value inputs/case-0/prior.txt
-
-    Prior file
-
    --scaling value, -c value
-
     default value 0.15
-
     scaling of innovation
-
    --nsim value, -n value
-
     default value 50000
-
     Length of MCMC chain
-
    --npart value
-
     default value 1500000
-
     Number of Particles for PF
-
    --zlb value
-
     default value .true.
-
     Impose ZLB
-
    --output-file value
-
     default value output.json
-
     Output file
-
    --seed value
-
     default value 1848
-
     Seed for RNG
-
    --help, -h
-
     Print this help message
-
    --version, -v
-
     Print version
 	```
 
