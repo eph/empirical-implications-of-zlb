@@ -15,7 +15,7 @@ double precision, parameter :: M_PI = 3.14159265358979323846d0
 type model
    character(len=144) :: name = 'ghlss_v5_2'
 
-   character(len=144) :: datafile = '/msu/scratch3/m1cjg01/aer_revision_ed/model/glss_data.txt'
+   character(len=144) :: datafile = 'data/glss_data.txt'
    integer :: nobs = 7, T = 125, neps = 6
    double precision, allocatable :: yy(:,:) 
    double precision, allocatable :: HH(:,:)
