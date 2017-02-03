@@ -18,7 +18,6 @@ To run this code, you need:
 4. Matlab (for plotting + analying impulse responses and simulated moments)
 
 ## Additional Fortran Libraries
-----------------------------
 1. SparseAMA (https://github.com/es335mathwiz/sparseAMA)
    Sparse matrix version of the Anderson Moore Algorithm.
 
