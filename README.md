@@ -13,7 +13,7 @@ This code was written for Linux.  It may be possible to run it on OSX or Windows
 To run this code, you need:
 
 1. Intel Fortran (with MKL libraries)
-2. MPICH2 (i.e., a message passing interface with support for `ifort`.)  Infinibad is *highly* recommended.
+2. MPICH2 (i.e., a message passing interface with support for `ifort`.)  Infiniband is *highly* recommended.
 3. Python (+ associated packages, for figures, tables, and estimation of the linear model.  In particular, the DSGE package is required.  Install this using anaconda: `conda install dsge -c eherbst`.)
 4. Matlab (for plotting + analying impulse responses and simulated moments)
 
@@ -120,19 +120,25 @@ Figures + Table Generation
 ## Tables
 1. Posterior Distribution of the Parameters
    For `N=0,1,2,3`
+
    ```
    mpirun -n NPROC ./driver_prwmh --p0 STARTING_VALUE.txt --seed ASEED --output-file results/mcmc/outputN.json
    ```
+
    Then
+
    ```
    python python/tab_posterior.py
    ```
+
 2. Standard Deviations of Aggregate Variables at Business Cycle Frequencies
    Run the posterior estimation, then thin the posterior with:
+
    ```
    python python/thin_posterior.py
    ```
    Then run the matlab script:
+
    ```
    matlab -r "run('matlab/generate_momentstable.m')"
    ```

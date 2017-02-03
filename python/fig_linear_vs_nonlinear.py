@@ -27,11 +27,11 @@ nonlinear = from_matt(paraest)
 
 
 import sys
-sys.path.append('/msu/home/m1eph00/projects/dsge-book/code/helper/')
+
 from helper import SMCResults
 
 smc = SMCResults('GHLS_JPT_TEST', 
-                 data_dir='/msu/scratch3/m1cjg01/aer_revision_ed/python/glss/', 
+                 data_dir='results/linear-model/', 
                  npart=4000, nblocks=3, lam=2.1, nphi=999, paranames=map(str, mod.parameters))
 linear = smc.load_draws(range(1))
 
@@ -81,10 +81,3 @@ with saved_figure('linear_vs_nonlinear.pdf', nrows=1, ncols=2) as (fig, ax):
     data_sdevinv_linear = p.DataFrame(ax[1].get_lines()[1].get_xydata())
 
 
-# 508
-# writer = ExcelWriter('/msu/res5/Shared_Projects/GHLSS_AER/FEDS/508/linear_vs_nonlinear.xlsx')
-# data_phii_nonlinear.to_excel(writer,sheet_name='phii_nonlinear')
-# data_phii_linear.to_excel(writer,sheet_name='phii_linear')
-# data_sdevinv_nonlinear.to_excel(writer,sheet_name='stdevinv_nonlinear')
-# data_sdevinv_linear.to_excel(writer,sheet_name='stdevinv_linear')
-# writer.save()

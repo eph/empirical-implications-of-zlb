@@ -23,20 +23,10 @@ to_plot = ['Output Growth',
            'Interest Rate', 
            'Notional Rate']
 
-# 508
-# writer = ExcelWriter('/msu/res5/Shared_Projects/GHLSS_AER/FEDS/508/observable_fit.xlsx')
-# data.to_excel(writer,sheet_name='data')
-# mean.to_excel(writer,sheet_name='mean')
-# q16.to_excel(writer,sheet_name='q16')
-# q84.to_excel(writer,sheet_name='q84')
-# writer.save()
-
-
 col = figure_defaults()
 
 
-#with saved_figure('/msu/res2/Shared_Projects/GLS/G_LS_S/latex_aer_revision/figures_aer2/observable_fit.pdf', nrows=3, ncols=2) as (fig, ax):
-with saved_figure('/msu/scratch3/m1cjg01/aer_revision_ed/python/notebooks/figures_aer2/observable_fit.pdf', nrows=3, ncols=2) as (fig, ax):
+with saved_figure('observable_fit.pdf', nrows=3, ncols=2) as (fig, ax):
     
     xlabels = p.PeriodIndex(range(1985, 2016, 5), freq='A')
 

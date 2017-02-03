@@ -10,31 +10,9 @@ from pandas import ExcelWriter
 
 from matplotlib.ticker import MultipleLocator, FixedLocator
 
-#sim_dir_jan_aer = '/msu/scratch3/m1cjg01/aer_revision_ed/final-results/smoothed-states/' # Jan. AER Revision
+
 baseline = load_simulation()
 
-#### Moved to simulations_aer2 ------------------
-# parasim['sig_uncon_liq'] = np.sqrt(parasim.sdevliq**2/(1-parasim.rholiq**2))
-# parasim['sig_uncon_inv'] = np.sqrt(parasim.sdevinv**2/(1-parasim.rhoinv**2))
-# #parasim['sig_uncon_demand'] = np.sqrt(parasim.sdevg**2/(1-parasim.rhog**2))
-# #parasim['sig_uncon_mp'] = np.sqrt(parasim.sdevint**2)
-
-# baseline['scaled_liq'] = 0.0
-# baseline['scaled_inv'] = 0.0
-# #baseline['scaled_mp'] = 0.0
-# #baseline['scaled_demand'] = 0.0
-
-# for q in date_index:
-#     baseline.ix[q]['scaled_liq'] = baseline.ix[q]['liqshk'] / parasim.sig_uncon_liq
-#     baseline.ix[q]['scaled_inv'] = baseline.ix[q]['invshk'] / parasim.sig_uncon_inv
-#     #baseline.ix[q]['scaled_mp'] = baseline.ix[q]['intshk'] / parasim.sig_uncon_mp
-#     #baseline.ix[q]['scaled_demand'] = baseline.ix[q]['gshk'] / parasim.sig_uncon_demand
-#### --------------------------------------------
-
-#baseline['techdev'] = baseline['Technology Level'] - baseline['Technology Det']
-
-#baseline.premium = 400*np.log(baseline.premium)
-#premium = load_simulation(sim_dir='/mq/home/m1eph00/tmp/aer_revision_ed/final_code/final-final/alt-sims/equity_premium')#.groupby(level=0).mean()['2008':]
 
 mean = baseline.groupby(level=0).mean()['2008':]
 q16 = baseline.groupby(level=0).quantile(0.16)['2008':]
@@ -47,18 +25,18 @@ q84 = baseline.groupby(level=0).quantile(0.84)['2008':]
 #         'techdev': 'Technology Shock'}
 
 
-ebp = p.read_csv('/mq/DSGE/research/MPpremia/publicCodes/data/raw/GLZ_variables.csv', index_col=0, parse_dates=True).ebp_oa
+ebp = p.read_csv('data/GLZ_variables.csv', index_col=0, parse_dates=True).ebp_oa
 ebpq = ebp.resample('Q', how=lambda x: x[-1])
 ebpq = ebpq / ebpq.std()
 
-baa = p.read_csv('/msu/scratch3/m1cjg01/aer_revision_ed/python/notebooks/Baaspread10y.csv', index_col = 0, parse_dates=True).baa
+baa = p.read_csv('data/Baaspread10y.csv', index_col = 0, parse_dates=True).baa
 baaq = baa.resample('Q',how=lambda x: x[-1])
 
 erp = [3.7798,  3.6601,   3.9595,   3.9612,   3.8119,   3.7339,   3.8315,   4.9372,   4.8648,   4.7810,   5.8417,   5.5786,   7.4788,   7.7432,   8.3548,   8.0830,   7.4911,   7.8343,   8.6081,   8.4127,   9.4940,  11.5793,  12.8545,  12.9051,  12.5041,  13.0734,  13.6974,  12.1652,  11.6023,  11.3401,  10.6794,  10.1015,   9.8318,   9.2482,   9.1041,   8.8669,   8.5851,   8.7962,   8.2809,   8.0348,   8.5987,   8.9522,   9.1013,   9.1247,   8.8152,   8.6266,   8.3927,   8.0683,   8.0297,   7.7565,   7.9376,   8.1317,   8.1017,   8.4215,   8.4493,   9.4906,   9.6438,   9.7760,   9.6719,   9.5697,   9.4257,   9.0696,   8.8413,   9.1381,   9.4851,   9.5763,   9.7325,   9.4708,   9.2138,   9.6695,   9.9707,   9.8267,   9.6674,   9.4558,   9.2933,   9.5280,   9.1225,   9.2017,   9.1923,   9.1795,   9.1234,   9.0744,   8.7467,   8.6200,   8.9146,   8.8910,   8.6727,   8.9890,   8.8787,   8.6189,   8.7492,   8.8183,   8.6794,   9.1658,   8.7191,   8.6609,   9.1134,   8.8676,   8.8663,   8.9956,   8.9457,   8.9604,   9.0846,   9.2850,   9.8057,   9.6808,   9.3658]
 
 erp = p.Series(erp, index=p.period_range(freq='M', start='2007-1', periods=len(erp))).resample('Q')
 
-eerp = p.read_csv('/msu/scratch3/m1cjg01/aer_revision_ed/python/notebooks/EquityRiskPremiumTR.csv', index_col = 0, parse_dates=True).eerp
+eerp = p.read_csv('data/EquityRiskPremiumTR.csv', index_col = 0, parse_dates=True).eerp
 eerp = eerp['2007':'2014']
 eerpq = eerp.resample('Q',how='mean')
 
@@ -124,7 +102,7 @@ rp_q84 = p.Series(shocks_q84['exogvar_01'])
 rp_q84.index = date_index
 
 # Equity premium
-premium_dir='/msu/home/m1eph00/tmp/aer_revision_ed/final_code/final-final/alt-sims/'
+premium_dir='results/alt-sims/'
 
 premium_list = [f for f in listdir(premium_dir) 
                if f.startswith('equity_premiumoutput')]
@@ -162,27 +140,11 @@ ep_q84.index = date_index
 
 
 
-# 508 
-# writer = ExcelWriter('/msu/res5/Shared_Projects/GHLSS_AER/FEDS/508/shocks_combo.xlsx')
-# mean.to_excel(writer,sheet_name='mean')
-# q16.to_excel(writer,sheet_name='q16')
-# q84.to_excel(writer,sheet_name='q84')
-# rp_mean.to_frame().to_excel(writer,sheet_name='rp_mean')
-# rp_q16.to_frame().to_excel(writer,sheet_name='rp_q16')
-# rp_q84.to_frame().to_excel(writer,sheet_name='rp_q84')
-# ep_mean.to_frame().to_excel(writer,sheet_name='ep_mean')
-# ep_q16.to_frame().to_excel(writer,sheet_name='ep_q16')
-# ep_q84.to_frame().to_excel(writer,sheet_name='ep_q84')
-# ebpq.to_frame().to_excel(writer,sheet_name='ebpq')
-# baaq.to_frame().to_excel(writer,sheet_name='baaq')
-# erp.to_frame().to_excel(writer,sheet_name='erp')
-# writer.save()
-
 
 figure_defaults()
 
-#with saved_figure('/msu/res2/Shared_Projects/GLS/G_LS_S/latex_aer_revision/figures_aer2/shocks_combo.pdf', nrows=2, ncols=2) as (fig, ax):
-with saved_figure('/msu/scratch3/m1cjg01/aer_revision_ed/python/notebooks/figures_aer2/shocks_combo.pdf', nrows=2, ncols=2) as (fig, ax):
+
+with saved_figure('shocks_combo.pdf', nrows=2, ncols=2) as (fig, ax):
     
     # Risk Premium Shock (top left)
     mean['scaled_liq'].plot(ax=ax[0, 0], linewidth=2)

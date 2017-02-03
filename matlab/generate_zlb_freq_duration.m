@@ -195,67 +195,7 @@ end
         set(figure(1), 'PaperSize', [6 8]);
         %set(figure(1), 'PaperPosition', [0.05 0.05 5.9 7.9]); 
         set(figure(1), 'PaperPosition', [0 -0.4 6 8.5]); 
-        %print -dpsc2 'figure_drafts/zlbfreqhist.ps';
-        %print -dpdf 'figure_drafts/zlbfreqhist.pdf';
-        %print -dpdf '/msu/res2/Shared_Projects/GLS/G_LS_S/latex_aer_revision/zlb_freq_duration.pdf';entile','FontName','Times New Roman','FontWeight','bold','FontSize',12);
-        %text(zlbdur_upper_ci(2) - .5,1.3,'99.5th Percentile','FontName','Times New Roman','FontWeight','bold','FontSize',12);
 
 
         
         
-        % upper inner plot
-%         
-%            handaxes2 = axes('position', [0.5502 0.7492 0.3268 0.1351]);   
-%         edges2 = [30:5:70];
-%         [Nzlbbin2] = histc(100*zlbsampledata,edges2);
-%         freq2 = 100*Nzlbbin2./Ndata;
-%         hb=bar(edges2,freq2,'histc');   
-%         set(hb,'FaceColor','b')
-%         title('Far-Right Tail of the Histogram','FontName',...
-%               'times','interpreter','latex','FontWeight',fw,'Fontsize',10);
-%         ylabel('Percent of Observations','FontName',...
-%                'times','FontWeight',fw,'Fontsize',10);
-%         xlabel('Percent','FontName',...
-%                'times','FontWeight',fw,'Fontsize',10);
-%         xlim([30 70]);
-%         set(handaxes2, 'box', 'off');
-%         
-%         % lower inner plot 
-%          handaxes2 = axes('position', [0.5502 0.2692 0.3268 0.1351]);   
-%         edges3 = [20:5:70];
-%         [Ndurbin3] = histc(duration_spell,edges3);
-%         freq3 = 100*Ndurbin3./Ndur;
-%         hb=bar(edges3,freq3,'histc');   
-%         set(hb,'FaceColor','b')
-%         title('Far-Right Tail of the Histogram','FontName',...
-%               'times','interpreter','latex','FontWeight',fw,'Fontsize',10);
-%         ylabel('Percent of Spells','FontName',...
-%                'times','FontWeight',fw,'Fontsize',10);
-%         xlabel('Quarters','FontName',...
-%                'times','FontWeight',fw,'Fontsize',10);
-%         xlim([20 70]);
-%         ylim([0 0.15]);
-%         set(handaxes2,'YTick',[0 0.05 0.1 0.15]);
-%         set(handaxes2, 'box', 'off');
-%         
-        
-%         set(figure(1),'PaperPositionMode', 'manual') 
-%         set(figure(1), 'PaperUnits', 'inches');
-%         set(figure(1), 'PaperSize', [6 8]);
-%         set(figure(1), 'PaperPosition', [0.05 0.05 5.9 7.9]); 
-        %print -dpsc2 'figure_drafts/zlbfreqhist.ps';
-        %print -dpdf 'figure_drafts/zlbfreqhist.pdf';
-        
-        print -dpdf '/msu/res2/Shared_Projects/GLS/G_LS_S/latex_aer_revision/figures_aer2/zlb_freq_duration_rbar25_1000draws.pdf'; %%% print command used
-        %saveas(figure1a,'/msu/res2/Shared_Projects/GLS/G_LS_S/latex_aer_revision/figures_aer2/zlb_freq_duration_rbar10_1000draws.pdf','pdf');
-        
-        % 508
-%         upper_main = [edges4a' freq4a];
-%         upper_inner = [edges2' freq2];
-%         lower_main = [edges1' freq1];
-%         lower_inner = [edges3' freq3];
-%         xlswrite('/msu/res5/Shared_Projects/GHLSS_AER/FEDS/508/zlbfreqhist_upper_main.xls',upper_main);
-%         xlswrite('/msu/res5/Shared_Projects/GHLSS_AER/FEDS/508/zlbfreqhist_upper_inner.xls',upper_inner);
-%         xlswrite('/msu/res5/Shared_Projects/GHLSS_AER/FEDS/508/zlbfreqhist_lower_main.xls',lower_main);
-%         xlswrite('/msu/res5/Shared_Projects/GHLSS_AER/FEDS/508/zlbfreqhist_lower_inner.xls',lower_inner);
-%        

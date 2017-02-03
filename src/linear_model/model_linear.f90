@@ -12,9 +12,9 @@ module class_Model
 
      character(len=144) :: name = 'model_v5_2_linear'
 
-     character(len=300) :: datafile = '/msu/scratch3/m1cjg01/aer_revision_ed/python/linear_JPT/model/yy.txt'
-     character(len=300) :: priorfile = '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/other/linear_model_exploration/ghlss_linear_me_3_nobs_5_ashk/model/prior.txt'
-     character(len=300) :: transfile = '/msu/scratch3/m1cjg01/aer_revision_ed/final_code/other/linear_model_exploration/ghlss_linear_me_3_nobs_5_ashk/model/trans.txt'
+     character(len=300) :: datafile = 'yy.txt'
+     character(len=300) :: priorfile = 'prior.txt'
+     character(len=300) :: transfile = 'trans.txt'
 
      double precision, allocatable :: yy(:,:) 
      integer :: nobs = 5, T = 125, ny = 5
