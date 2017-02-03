@@ -3,7 +3,7 @@
 
 The paper can be found here: https://www.aeaweb.org/articles?id=10.1257/aer.20121437&&from=f
 
-contact: Ed Herbst [edward.p.herbst@frb.gov]
+contact: Ed Herbst [ed.herbst@gmail.com]
 
 up to date version of this code: http://github.com/eph/empirical-implications-of-zlb
 
@@ -14,7 +14,7 @@ To run this code, you need:
 
 1. Intel Fortran (with MKL libraries)
 2. MPICH2 (i.e., a message passing interface with support for `ifort`.)  Infinibad is *highly* recommended.
-3. Python (+ associated packages, for figures, tables, and estimation of the linear model.)
+3. Python (+ associated packages, for figures, tables, and estimation of the linear model.  In particular, the DSGE package is required.  Install this using anaconda: `conda install dsge -c eherbst`.)
 4. Matlab (for plotting + analying impulse responses and simulated moments)
 
 ## Additional Fortran Libraries
@@ -81,9 +81,9 @@ Figures + Table Generation
     
 5. Model objects for different values of Measurement Error
 
-    Estimate the model with a different value for the measurement errors (i.e,
-   change the last values of the parameter vector). Then follow the steps in 4.
-   (You may want to change the directories to not overwrite earlier
+    * Estimate the model with a different value for the measurement errors (i.e,
+   change the last values of the parameter vector). 
+   *  Then follow the steps in [4]. (You may want to change the directories to not overwrite earlier
    estimations.)
 
 6. Distribution of the Probability and Duration of Being at the ZLB
@@ -117,7 +117,7 @@ Figures + Table Generation
     * For each of set of smoothed estimates, run the nozlb_2008 altsim using `driver_altsim`
     * Run the python script `python/fig_effect_of_zlb.py`
 
-# Tables
+## Tables
 1. Posterior Distribution of the Parameters
    For `N=0,1,2,3`
    ```
