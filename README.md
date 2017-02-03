@@ -83,3 +83,4 @@ Figures + Table Generation
     * For each of 1000 draws run: `driver_smoother -p0 results/thinned_posterior/NNNNpara.txt --output-file outputNNNN.json`
 
 8. The Path of the Estimated Technology Shocks
+

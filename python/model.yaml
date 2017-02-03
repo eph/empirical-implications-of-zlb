@@ -1,0 +1,221 @@
+declarations:
+  name: 'modelv5'
+  variables: [cap, cc, inv, realw, notr, dp, gdp, xhp, nomr, lam, tobq, lab, util, mcost, rentalk, muc, vi, vp, vw, dw, bc, bi, liqshk, invshk, techshk, intshk, gshk, elastshk, elastwshk, gdplag,  cclag, invlag, realwlag]
+  shocks: [errliq, errinv, errtech, errint, errgshk, errelast, errelastw]
+  parameters: [beta_tr, pibar_tr, gz, gamma, sigmal, phi, phiw, ep_tr, epw_tr, ap_tr, aw_tr, alpha, delta, phii, sigmaa, gam_rs, gam_dp, gamdy, shrgy, sdevtech_tr, rhog, sdevg_tr, rhoinv, sdevinv_tr, rholiq, sdevliq_tr, rhoint, sdevint_tr]
+  para_func: [gamxhp, rhoelast, sdevelast_tr, rhoelastw, sdevelastw_tr, lamhp, psil, beta, pibar, ep, epw, ap, aw, bw, sdevtech, sdevg, sdevinv, sdevliq, sdevint, sdevelast, sdevelastw, gg, gamtil, mc, k2yrat, shriy, shrcy, labss, kappaw, kappap, kss, gdpss, invss, phii_jpt, css, rwss, mucss, lamss, rss, rkss]
+  observables: [ygr, cgr, igr, infl, nomr] 
+  measurement_errors: [meas_ygr, meas_cgr, meas_igr, meas_infl, meas_nomr]
+
+equations:
+  model:
+    - tobq = ((1-delta)*beta/gz)*tobq(+1) + lam(+1) - lam - techshk(+1) + (1-((1-delta)*beta/gz))*rentalk(+1) 
+
+    - (1-gamtil)*(1-gamtil*beta)*lam = -(1+gamtil*gamtil*beta)*cc + gamtil*(cc(-1)-techshk) + gamtil*beta*(cc(+1) + techshk(+1))
+    
+    - (1-(1-delta)/gz)*(inv + invshk) = cap - ((1-delta)/gz)*(cap(-1) - techshk)
+    
+    - realw = realw(-1) + dw - dp - techshk
+    
+    - notr =  gam_rs*notr(-1) + (1-gam_rs)*( gam_dp*dp + gamxhp*xhp + gamdy*(gdp - gdp(-1) + techshk)) + intshk
+    
+    - dp = beta/(1+beta*(1-ap))*dp(+1) + (1-ap)/(1+beta*(1-ap))*dp(-1) + kappap*mcost - (kappap/(ep-1))*elastshk
+    
+    - gdp = gg*shrcy*cc + gshk + gg*shriy*inv + gg*alpha*((ep-1)/ep)*util 
+    
+    - xhp = alpha*util + (1-alpha)*lab
+    
+    - nomr = notr
+    
+    - lam = lam(+1) + (notr - dp(+1)) + liqshk - techshk(+1)
+    
+    - tobq = -invshk + phii_jpt*(1+beta)*inv-phii_jpt*inv(-1) - beta*phii_jpt*inv(+1) + phii_jpt*techshk - beta*phii_jpt*techshk(+1)
+    
+    - (1-alpha)*lab = gdp-alpha*(util + cap(-1) - techshk)
+    
+    - util = (1/sigmaa)*rentalk
+    
+    - mcost = realw - (gdp - lab)
+            
+    - rentalk =  realw + lab - util - cap(-1) + techshk
+    
+    - (1-gamtil)*muc = -cc + gamtil*(cc(-1) - techshk)  
+    
+    - vi =  inv - inv(-1) + techshk 
+    
+    - vp = dp - (1-ap)*dp(-1)
+    
+    - vw = beta*vw(+1) + kappaw*(sigmal*lab - lam - realw) - (kappaw/(epw-1))*elastwshk
+    
+    - dw = (1-aw)*dp(-1) + (1-bw)*techshk + vw
+    
+    - bc = -1/(1-gamtil)*(cc(+1)+gamtil*(techshk(+1)-cc))
+    
+    - bi = (inv(+1) - inv + techshk(+1))
+    
+    - gdplag = gdp(-1)
+
+    - cclag = cc(-1)
+
+    - invlag = inv(-1)
+
+    - realwlag = realw(-1)
+
+    # shocks
+    - liqshk = rholiq*liqshk(-1) + errliq
+    
+    - invshk = rhoinv*invshk(-1) + errinv
+    
+    - techshk = errtech
+    
+    - intshk = rhoint*intshk(-1) + errint
+    
+    - gshk = rhog*gshk(-1) + errgshk
+    
+    - elastshk = rhoelast*elastshk(-1) + errelast
+    
+    - elastwshk = rhoelastw*elastwshk(-1) + errelastw
+
+  observables:
+    ygr : log(gz) + gdp- gdplag + techshk
+    cgr : log(gz) + cc - cclag + techshk
+    igr : log(gz) + inv - invlag + techshk
+    infl : log(pibar) + dp
+    nomr : log(gz*pibar/beta) + nomr
+        
+calibration:
+  parameters:
+    beta_tr : 100*(0.99843730^-1 - 1)
+    pibar_tr : 100*(1.00607951 - 1)
+    gz : 1.00586879
+    gamma : 0.52323556
+    sigmal : 2.04724047
+    phi : 113.36316712
+    phiw : 4029.72644029
+    ep_tr : 100/(5.29704221-1)
+    epw_tr : 100/(8.32601712-1)
+    ap_tr :  1-0.26556192
+    aw_tr :   1-0.68732933
+    alpha :  0.32562593
+    delta :  0.02461740
+    phii :   3.48130086
+    sigmaa : 5.64497737
+    gam_rs : 0.69449115
+    gam_dp : 1.91060000
+    gamdy :  0.27180239
+    shrgy :  0.18694814
+    sdevtech_tr: 0.00420848*100
+    rhog:  0.43742240
+    sdevg_tr:  0.00177246*100
+    rhoinv:  0.44150080
+    sdevinv_tr:  0.04946043*100
+    rholiq:  0.95870271
+    sdevliq_tr: 0.00137775*100
+    rhoint: 0.24446703
+    sdevint_tr: 0.00098857
+
+
+
+  parafunc:
+    rhoelast: 0.0
+    sdevelast_tr:  0.0
+    rhoelastw:  0.0
+    sdevelastw_tr: 0.0
+    gamxhp : 0.1642953
+    lamhp : 1600.00000000
+    psil : 1.00000000
+    beta: 1.0/(beta_tr/100.0 + 1.0)
+    pibar: 1.0/100*pibar_tr + 1
+    ep: (1.0+ep_tr)/ep_tr 
+    epw: (1.0+epw_tr)/epw_tr
+    aw: 1.0-aw_tr
+    ap: 1.0-ap_tr
+    bw : aw
+    sdevliq : sdevliq_tr / 100.0
+    sdevinv : sdevinv_tr / 100.0
+    sdevtech : sdevtech_tr / 100.0
+    sdevint : sdevint_tr / 100.0
+    sdevg : sdevg_tr / 100.0
+    sdevelast : sdevelast_tr / 100.0
+    sdevelastw : sdevelastw_tr / 100.0
+    gg : 1.0/(1.0-shrgy)
+    gamtil : gamma/gz
+    mc : (ep-1.0)/ep
+    k2yrat : ((mc*alpha)/(gz/beta-(1.0-delta)))*gz
+    shriy : (1.0-(1.0-delta)/gz)*k2yrat
+    shrcy : 1.0-shrgy-shriy
+    labss : ( ((epw-1.0)/epw)*(1.0-alpha)*(1.0-beta*gamtil)*((ep-1.0)/ep)*(1.0/(psil*(1.0-gamtil)))*(1.0/shrcy) )^(1.0/(sigmal+1.0))
+    kappaw : ((1.0-gamtil)/(1.0-beta*gamtil))*epw*psil*labss^(1.0+sigmal)/phiw
+    kappap : (ep-1.0)/(phi*(1.0+beta*(1.0-ap)))
+    kss : labss*(gz^(alpha/(alpha-1.0)))*k2yrat^(1.0/(1.0-alpha))
+    gdpss : (kss/gz)^alpha*labss^(1.0-alpha)
+    invss : shriy*gdpss
+    phii_jpt : phii/invss
+    css : shrcy*gdpss
+    rwss : (1.0-alpha)*mc*gdpss/labss
+    mucss : (1.0/css)*(1.0/(1.0-gamtil))
+    lamss : mucss*(1.0-beta*gamtil)
+    rss : gz*pibar/beta
+    rkss : gz/beta-1.0+delta
+
+  covariances:
+    errliq : (sdevliq)^2
+    errinv : (sdevinv)^2
+    errtech : (sdevtech)^2
+    errint  : (sdevint)^2
+    errgshk : (sdevg)^2
+    errelast : (sdevelast)^2
+    errelastw : (sdevelastw)^2
+    
+
+  measurement_errors:
+    meas_ygr: 0.00323357^2
+    meas_cgr: 0.00256811^2
+    meas_igr: 0.01218603^2
+    meas_infl: 0.00122426^2
+    meas_nomr: 0.00358562^2
+
+
+estimation:
+  data: 'data/glss_data_5.txt'
+
+
+  prior: 
+    beta_tr : [gamma, 0.25, 0.1]
+    pibar_tr : [normal, 0.5, 0.1]
+    gz: [normal, 1.005, 0.001]
+    #psil: [normal, 1.0, 0.1]
+    gamma: [beta, 0.5, 0.22360679774997896]    # beta(2, 2)
+    sigmal: [gamma, 2.0, 0.75]
+    phi: [normal, 100, 25]
+    phiw: [normal, 3000, 5000]
+    ep_tr: [normal, 0.15, 0.05]
+    epw_tr: [normal, 0.15, 0.05]
+    ap_tr: [beta, 0.5, 0.22360679774997896]
+    aw_tr: [beta, 0.5, 0.22360679774997896]
+    #bw: [beta, 0.5, 0.22]
+    #lamhp: [normal, 1600.0, 100.0]
+    alpha: [normal, 0.33, 0.01]
+    delta: [normal, 0.025, 0.0005]
+    phii: [gamma, 4.0, 1.0]
+    sigmaa: [gamma, 5.0, 1.0]
+    gam_rs: [normal, 0.0, 0.2]
+    gam_dp: [normal, 1.7, 1.0]
+    #gamxhp: [normal, 0.125, 1.0]
+    gamdy: [normal, 0.125, 1.0]
+    shrgy: [normal, 0.2, 0.005]
+    sdevtech_tr: [inv_gamma, 0.33, 2]
+    rhog: [normal, 0.0, 0.1]
+    sdevg_tr: [inv_gamma, 0.33, 2]
+    rhoinv: [normal, 0.0, 0.1]
+    sdevinv_tr: [inv_gamma, 0.33, 2]
+    rholiq: [normal, 0.0, 0.1]
+    sdevliq_tr: [inv_gamma, 0.33, 2]
+    rhoint: [normal, 0.0, 0.1]
+    sdevint_tr: [inv_gamma, 0.33, 2]
+    # rhoelast: [beta, 0.5, 0.22]
+    # sdevelast_tr: [inv_gamma, 0.33, 2]
+    # rhoelastw: [beta, 0.5, 0.22]
+    # sdevelastw_tr: [inv_gamma, 0.33, 2]
+
+
