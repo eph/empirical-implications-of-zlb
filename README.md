@@ -13,7 +13,7 @@ This code was written for Linux.  It may be possible to run it on OSX or Windows
 To run this code, you need:
 
 1. Intel Fortran (with MKL libraries)
-2. MPICH2 (i.e., a message passing interface with support for `ifort`.)  Infiniband is *highly* recommended.
+2. MVAPICH2 (i.e., a message passing interface.)  Infiniband is *highly* recommended.
 3. Python (+ associated packages, for figures, tables, and estimation of the linear model.  In particular, the DSGE package is required.  Install this using anaconda: `conda install dsge -c eherbst`.)
 4. Matlab (for plotting + analying impulse responses and simulated moments)
 
