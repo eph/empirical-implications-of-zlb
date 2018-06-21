@@ -134,7 +134,7 @@ type(model) function new_model(zlbswitch) result(m)
      m%solution%poly%zlbswitch = .true.
   end if
 
-  if (zlbswitch .eq. .false.) then
+  if (zlbswitch .eqv. .false.) then
      m%name = 'ghlss_v5_2_unc'
   end if
 

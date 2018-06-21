@@ -64,7 +64,7 @@ call simulate_linear(solution%linsol,solution%poly%ns,solution%poly%nmsv,solutio
      solution%poly%nshockgrid,endog_emean,zlbfrequency,msvbounds,statezlbinfo,convergence)
 
 !check to see how many times the linear model wants a  "nearly-explosive" path
-if (convergence .eq. .false.) then
+if (convergence .eqv. .false.) then
    return
 end if 
 
@@ -79,7 +79,7 @@ slopeconxx(nmsvplus+1:2*nmsvplus) = msvbounds(1:nmsvplus) + 0.5d0*&
   (msvbounds(nmsvplus+1:2*nmsvplus)-msvbounds(1:nmsvplus))
 
 !if no starting guess, construct one from linear solution
-if (solution%startingguess .eq. .false.) then
+if (solution%startingguess .eqv. .false.) then
    call lindecrule_markov(solution%linsol,aalin,bblin)
    
    alphacoeff0 = initialalphas(solution%poly%nfunc,solution%poly%ngrid,&

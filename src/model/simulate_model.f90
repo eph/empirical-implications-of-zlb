@@ -12,6 +12,8 @@ use rng_serial
 use model_details, only: decr, polydetails
 use linear_solution, only: decrlin, linsoldetails
 
+use fortress_random_t, only: fortress_random
+
 implicit none
 
 public :: simulate_data, simulate_irfs, compute_zlbstats
@@ -54,22 +56,28 @@ integer :: brng
 integer :: method
 integer :: errcode
 integer :: iseed
-type (vsl_stream_state) :: stream   
+type(fortress_random) :: rng
+!type (vsl_stream_state) :: stream   
 
 !get random normals
 iseed = 101293
-if (present(seed)) iseed = seed
 
-brng = vsl_brng_mt19937
-method = vsl_rng_method_gaussian_boxmuller 
-errcode = vslnewstream( stream,   brng,  iseed )
-errcode = vdrnggaussian( method, stream, poly%nexog*capt, xrandn, 0.0d0, 1.0d0)
+
+if (present(seed)) iseed = seed
+rng = fortress_random(seed=iseed)
+xrandn = rng%norm_rvs(poly%nexog, capt)
+
+
+! brng = vsl_brng_mt19937
+! method = vsl_rng_method_gaussian_boxmuller 
+! errcode = vslnewstream( stream,   brng,  iseed )
+! errcode = vdrnggaussian( method, stream, poly%nexog*capt, xrandn, 0.0d0, 1.0d0)
 
 modeldata = 0.0d0
 endogvar = 0.0d0
 counter = 0
 displacement = 400
-if (nonlinearswitch .eq. .true.) then
+if (nonlinearswitch .eqv. .true.) then
    endogvar(1:poly%nmsv,0) = exp(poly%endogsteady(1:poly%nmsv))
    msvhigh = exp(poly%endogsteady(1:poly%nmsv))*2.0d0
    msvlow = exp(poly%endogsteady(1:poly%nmsv))*0.01d0
@@ -88,7 +96,7 @@ counterloop: do
    do ttsim = llim,ulim
       innovations(1:poly%nexogshock) = xrandn(1:poly%nexogshock,ttsim)
       if (poly%nexogcont > 0) innovations(poly%nexog-poly%nexogcont+1:poly%nexog) = xrandn(poly%nexog-poly%nexogcont+1:poly%nexog,ttsim)
-      if (nonlinearswitch .eq. .true.) then
+      if (nonlinearswitch .eqv. .true.) then
          call decr(endogvar(:,ttsim-1),innovations,params,poly,alphacoeff,endogvar(:,ttsim))
          modeldata(1:poly%nvars+poly%nexog,ttsim) = endogvar(:,ttsim)
       else
@@ -105,11 +113,12 @@ counterloop: do
    checkloop: do ttsim = llim,ulim
       non_explosive = ( all(endogvar(1:poly%nmsv,ttsim) .le. msvhigh) .and.  &
            all(endogvar(1:poly%nmsv,ttsim) .ge. msvlow) ) 
-      explosiveerror = ( (non_explosive .eq. .false.) .or. (isnan(endogvar(1,ttsim)) .eq. .true.) )
-      if (explosiveerror == .true.)  then
+      explosiveerror = ( (non_explosive .eqv. .false.) .or. (isnan(endogvar(1,ttsim)) .eqv. .true.) )
+      if (explosiveerror .eqv. .true.)  then
          counter = max(ttsim-350,0)
-         errcode = vdrnggaussian( method, stream, poly%nexog*capt, xrandn, 0.0d0, 1.0d0)
-         if (explosiveerror == .true.) then 
+         xrandn = rng%norm_rvs(poly%nexog, capt)
+         !errcode = vdrnggaussian( method, stream, poly%nexog*capt, xrandn, 0.0d0, 1.0d0)
+         if (explosiveerror .eqv. .true.) then 
             write(*,*) 'solution exploded at ', ttsim, ' vs ulim ', ulim
          end if
           
@@ -120,7 +129,7 @@ counterloop: do
       end if
    end do checkloop
 
-   if (explosiveerror == .false.) then
+   if (explosiveerror .eqv. .false.) then
       counter = counter + displacement
    end if
 
@@ -243,13 +252,17 @@ integer :: brng
 integer :: method
 integer :: errcode
 integer :: iseed
-type (vsl_stream_state) :: stream    
+type(fortress_random) :: rng
+!type (vsl_stream_state) :: stream    
 
 iseed = 101293
-brng = vsl_brng_mt19937
-method = vsl_rng_method_gaussian_boxmuller 
-errcode = vslnewstream( stream,   brng,  iseed )
-errcode = vdrnggaussian( method, stream, poly%nexog*capt*ndraw, xrandn, 0.0d0, 1.0d0)
+rng = fortress_random(seed=iseed)
+xrandn = rng%norm_rvs(linsol%nexog, capt*ndraw)
+
+! brng = vsl_brng_mt19937
+! method = vsl_rng_method_gaussian_boxmuller 
+! errcode = vslnewstream( stream,   brng,  iseed )
+! errcode = vdrnggaussian( method, stream, poly%nexog*capt*ndraw, xrandn, 0.0d0, 1.0d0)
  
 endogirf = 0.0d0
 linirf = 0.0d0
@@ -298,7 +311,7 @@ do j = 1,ndraw
       else
          
          !compute absolute value of euler errors
-         if (eulererrorswitch .eq. .true.) then
+         if (eulererrorswitch .eqv. .true.) then
             nlerrorswitch = .true.
             errors_nl = euler_errorsfcn(neulererrors,endogvarshk(:,ttsim-1),endogvarshk(:,ttsim),params,poly,alphacoeff,nlerrorswitch,linsol)
             if (any(isnan(errors_nl))) then
@@ -422,7 +435,7 @@ exp_var = 0.0d0
 innovations = 0.0d0
 do ss = 1,poly%nquad
    innovations(1:poly%nexogshock) = poly%ghnodes(:,ss) 
-   if (nlerrorswitch .eq. .true.) then
+   if (nlerrorswitch .eqv. .true.) then
       call decr(endogvar,innovations,params,poly,alphacoeff,endogvarp)
    else
       lendogvar(1:poly%nvars) = log(endogvar(1:poly%nvars))

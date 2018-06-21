@@ -33,7 +33,7 @@ program driver_irfs
   character (len=250) :: filename
 
 
-  if (parallelswitch .eq. .true.) then
+  if (parallelswitch .eqv. .true.) then
      call MPI_init(mpierror)
      call MPI_Comm_size(MPI_COMM_WORLD,nproc,mpierror)
      call MPI_Comm_rank(MPI_COMM_WORLD,rank,mpierror)
@@ -84,20 +84,20 @@ program driver_irfs
   call read_matrix(filename,m%solution%poly%nparams,1,m%params)
 
   !solve model
-  if (parallelswitch .eq. .true.) then
+  if (parallelswitch .eqv. .true.) then
      convergence = m%solve_parallel(m%params,nproc,rank)
   else
      convergence = m%solve(m%params)
   end if
 
-  if (convergence .eq. .false.) then  !if no solution, report this back to disk
+  if (convergence .eqv. .false.) then  !if no solution, report this back to disk
      if (rank .eq. 0) write(*,*) 'Failed to converge (driverirf)'     
   else  !if computed solution, simulate and send irf data to disk
      if (rank .eq. 0) then
         write(*,*) 'Successfully solved model (driverirf). Computing IRFs.' 
         call m%simulate_modelirfs(captirf,nsim,shockindex,endogirf,linirf,euler_errors,neulererrors)
         !send irfs to disk
-        if (zlbswitch .eq. .true.) then
+        if (zlbswitch .eqv. .true.) then
            write(filename,"(A,I0,A)") 'results/irf/nonlinearirf_' // trim(param_type) // '_', shockindex , '.txt'
         else
            write(filename,"(A,I0,A)") 'results/irf/nonlinearirf_unc_' // trim(param_type) // '_', shockindex , '.txt'
@@ -113,7 +113,7 @@ program driver_irfs
   deallocate(endogirf,linirf,euler_errors)
   call m%cleanup()
 
-  if (parallelswitch .eq. .true.) then
+  if (parallelswitch .eqv. .true.) then
      call MPI_finalize(mpierror)
   end if
    

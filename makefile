@@ -9,17 +9,17 @@
 #------------------------------------------------------------
 # compilers and linkers
 #------------------------------------------------------------
-CC = icc
-FC = mpif90 -f90=ifort 
-LINK = mpif90 -f90=ifort
+CC = gcc
+FC = mpif90 #-f90=ifort 
+LINK = mpif90 #-f90=ifort
 
 
 #------------------------------------------------------------
 # external fortran libraries
 #------------------------------------------------------------ 
-CONDA=$(HOME)/miniconda2/envs/ifort
+CONDA=$(HOME)/anaconda3
 # sparseAMA
-SPAMADIR=/msu/home/m1cjg01/research/aer_revision_code/Fortran/sparseAMAViaModelEZ/sparseAMA
+SPAMADIR=/home/eherbst/Dropbox/zlb_estimation/sparseAMA
 FOBJS = $(patsubst %.f,%.o,$(wildcard $(SPAMADIR)/src/main/fortran/*.f))
 COBJS = $(patsubst %.c,%.o,$(wildcard $(SPAMADIR)/src/main/c/*.c))
 # AIM FILE
@@ -39,11 +39,11 @@ SLICOT = -L/mq/home/m1eph00/lib -lslicot_sequential
 
 
 #------------------------------------------------------------
-# compiler flags
+# compiler flags 
 #------------------------------------------------------------
 # for debug FC2 = -g -check all -warn all
 # use -fp-model precise for value-safe optimization of fp calculations (SLOW)
-FC2 = -O3 -nocheck -inline-level=2 -shared-intel -mcmodel=medium -xSSE4.2 -ipo 
+FC2 = -O3 -ffree-line-length-1000  #-nocheck -inline-level=2 -shared-intel -mcmodel=medium -xSSE4.2 -ipo 
 FFLAGS = -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
 CFLAGS = -c -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
 VPATH=src/model:src/temp:src/fortress:src/drivers:src/linear_model:generated_linear_model/base:generated_linear_model/base/amiller
@@ -54,18 +54,20 @@ LOBJS = rng_serial.o utils.o linear_solution.o polydef.o \
 	simulate_model.o class_model.o $(MODNAME)_AMA_matrices.o \
 	pdf_fcns.o pdfs.o priorfcn.o inbounds.o
 
+FORTRESS=-I/home/eherbst/anaconda3/include/fortress/ -L/home/eherbst/anaconda3/lib/ -lfortress
+
 
 %.o: %.f90
-	$(FC) $(FC2) -mkl -c  $<
+	$(FC) $(FORTRESS) $(FC2) -c $< #-mkl -c  $<
 
 $(MODNAME)_AMA_matrices.o : $(MODNAME)_AMA_matrices.c
-	$(CC) -shared -fPIC -ipo  $(CFLAGS) -c $< -I$(SPAMADIR)/src/main/include 
+	$(CC) -shared -fPIC $(CFLAGS) -c $< -I$(SPAMADIR)/src/main/include 
 
 driver_irfs: $(LOBJS) driver_irfs.f90 
 	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_irfs
 
 driver_simdata: $(LOBJS) driver_simdata.f90
-	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_simdata
+	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP)  $^ -o driver_simdata
 
 driver_selectmoments: $(LOBJS) driver_selectmoments.f90
 	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_selectmoments

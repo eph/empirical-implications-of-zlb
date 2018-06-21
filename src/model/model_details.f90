@@ -122,7 +122,7 @@ zlbintermediate = .false.  !start with evaluation of 1 poly case (omegapoly and 
 call intermediatedec(poly%nparams,poly%nvars,poly%nexog,poly%nfunc,endogvarm1,&
      currentshockvalues,params,funcapp,llabss,endogvar,omegapoly,funcapp,zlbintermediate)
 
-if ( (endogvar(5) .lt. 1.0d0) .and. (poly%zlbswitch == .true.) ) then  !zlb case
+if ( (endogvar(5) .lt. 1.0d0) .and. (poly%zlbswitch .eqv. .true.) ) then  !zlb case
    zlbintermediate = .true.
    omegapoly = exp(omegaweight*log(endogvar(5))) !now omegapoly and funcapp_plus relevant
    call dgemv('N', poly%nfunc, poly%ninter, 1.0d0, funcmatplus, poly%nfunc, weightvec, 1, &
@@ -302,7 +302,7 @@ notrm1 = endogvarm1(5)
 dpm1 = endogvarm1(6)
 gdpm1 = endogvarm1(7)
 
-if (zlbintermediate .eq. .true.) then
+if (zlbintermediate .eqv. .true.) then
    lam = omegapoly*exp(polyvar(1)) + (1.0d0-omegapoly)*exp(polyvarplus(1))
    qq = omegapoly*exp(polyvar(2)) + (1.0d0-omegapoly)*exp(polyvarplus(2))
    bp = omegapoly*polyvar(3) + (1.0d0-omegapoly)*polyvarplus(3)
@@ -457,7 +457,7 @@ llabss = poly%endogsteady(12)
 
 call intermediatedec(poly%nparams,poly%nvars,poly%nexog,poly%nfunc,endogvarm1,&
      currentshockvalues,params,polyapp(1:poly%nfunc),llabss,endogvar,omegapoly,polyapp(1:poly%nfunc),zlbintermediate)
-if ((zlbinfo .ne. 0) .and. (poly%zlbswitch .eq. .true.)) then 
+if ((zlbinfo .ne. 0) .and. (poly%zlbswitch .eqv. .true.)) then 
    call intermediatedec(poly%nparams,poly%nvars,poly%nexog,poly%nfunc,endogvarm1,&
      currentshockvalues,params,polyapp(poly%nfunc+1:2*poly%nfunc),llabss,endogvarzlb,omegapoly,&
      polyapp(poly%nfunc+1:2*poly%nfunc),zlbintermediate)
@@ -487,7 +487,7 @@ do ss = 1,poly%nquad
    ev(5) = endogvarp(16)/techshkp 
    ev(6) = endogvarp(10)*endogvarp(11)*invshkp*(endogvarp(17)-1.0d0)*endogvarp(17)*endogvarp(17)
 
-   if ((zlbinfo .ne. 0) .and. (poly%zlbswitch .eq. .true.)) then
+   if ((zlbinfo .ne. 0) .and. (poly%zlbswitch .eqv. .true.)) then
       call decr(endogvarzlb,innovations,params,poly,alphacoeff,endogvarzlbp)
       ev(7) = endogvarzlbp(10)/(endogvarzlbp(6)*techshkp) 
       utilcostp = (rkss/params(18))*(exp(params(18)*(endogvarzlbp(13)-1.0d0))-1.0d0)
@@ -524,7 +524,7 @@ polyappnew(5) = log(exp_eul(5))
 polyappnew(6) = exp_eul(6)
 polyappnew(7) = log( 1.0d0 + (1/params(18))*log(endogvar(15)/rkss) )
 
-if ((zlbinfo .ne. 0) .and. (poly%zlbswitch .eq. .true.)) then
+if ((zlbinfo .ne. 0) .and. (poly%zlbswitch .eqv. .true.)) then
    exp_eul(7) =  (params(1)/params(3))*liqshk*endogvarzlb(9)*exp_var(7)
    exp_eul(8) = (params(1)/params(3))*exp_var(8)/endogvarzlb(10)
    exp_eul(9) =  params(1)*exp_var(9)/(endogvarzlb(10)*endogvarzlb(7))+&

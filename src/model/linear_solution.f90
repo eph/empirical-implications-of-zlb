@@ -466,14 +466,18 @@ integer :: brng
 integer :: method
 integer :: errcode
 integer :: iseed
-type (vsl_stream_state) :: stream     
+type(fortress_random) :: rv
+!type (vsl_stream_state) :: stream     
 
 !get random uniforms
-iseed = 101293
-brng = vsl_brng_mt19937
-method = vsl_rng_method_gaussian_boxmuller 
-errcode = vslnewstream( stream,   brng,  iseed )
-errcode = vdrnggaussian( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
+!iseed = 101293
+!brng = vsl_brng_mt19937
+!method = vsl_rng_method_gaussian_boxmuller 
+!errcode = vslnewstream( stream,   brng,  iseed )
+!errcode = vdrnggaussian( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
+rv = fortress_random(seed=101293)
+xrandn = rv%norm_rvs(linsol%nexog,capt)
+
 
 !initialize endogenous variables and others 
 modelvar = 0.0d0
@@ -497,14 +501,15 @@ counterloop: do
    end do
 
    checkloop: do ttsim = llim,ulim
-      explosiveerror = (isnan(modelvar(1,ttsim)) .eq. .true.) 
-      if (explosiveerror == .true.)  then
+      explosiveerror = (isnan(modelvar(1,ttsim)) .eqv. .true.) 
+      if (explosiveerror .eqv. .true.)  then
          counter = max(ttsim-50,0)
-         errcode = vdrnguniform( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
-         if (explosiveerror == .true.) then 
+         !errcode = vdrnguniform( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
+         xrandn = rv%norm_rvs(linsol%nexog,capt)
+         if (explosiveerror .eqv. .true.) then 
             write(*,*) 'solution exploded at ', ttsim, ' vs ulim ', ulim
          end if
-          
+        
          if (counter == 0) then
             write(*,*) 'degenerated back to the beginning'
          end if
@@ -512,7 +517,7 @@ counterloop: do
       end if
    end do checkloop
 
-   if (explosiveerror == .false.) then
+   if (explosiveerror .eqv. .false.) then
       counter = counter + displacement
    end if
 

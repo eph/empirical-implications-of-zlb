@@ -11,6 +11,8 @@
 
 module polydef
 use linear_solution
+
+use fortress_random_t, only: fortress_random
 implicit none  
 
 !------------------------------------------------------------------------------------------------------------------
@@ -447,7 +449,7 @@ integer :: ie,blocksize,ncall,ic,ib
 double precision :: quadnodes_s(nquadsingle), quadweights_s(nquadsingle)
 double precision :: ghweights_mat(nexog,nquadsingle**nexog)
 
-if (any(nquadsingle .eq. nquadsingleset) .eq. .false.) then
+if (any(nquadsingle .eq. nquadsingleset) .eqv. .false.) then
    write(*,*) 'WARNING: nquadsingle must equal 3,5, or 7 (ghquadrature in polydef) and you set nquadsingle = ', nquadsingle
 end if 
 
@@ -688,14 +690,18 @@ integer :: brng
 integer :: method
 integer :: errcode
 integer :: iseed
-type (vsl_stream_state) :: stream     
+
+type(fortress_random) :: rng
+!type (vsl_stream_state) :: stream     
 
 !get random normals
 iseed = 101294
-brng = vsl_brng_mt19937
-method = vsl_rng_method_gaussian_boxmuller 
-errcode = vslnewstream( stream,   brng,  iseed )
-errcode = vdrnggaussian( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
+rng = fortress_random(seed=iseed)
+xrandn = rng%norm_rvs(linsol%nexog, capt)
+! brng = vsl_brng_mt19937
+! method = vsl_rng_method_gaussian_boxmuller 
+! errcode = vslnewstream( stream,   brng,  iseed )
+! errcode = vdrnggaussian( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
 
 nmsvplus = nmsv + linsol%nexogcont
 convergence = .true.
@@ -741,11 +747,12 @@ counterloop: do
    checkloop: do ttsim = llim,ulim
       non_explosive = ( all(endogvar(1:nmsv,ttsim) .le. msvhigh) .and.  &
            all(endogvar(1:nmsv,ttsim) .ge. msvlow) ) 
-      explosiveerror = ( (non_explosive .eq. .false.) .or. (isnan(endogvar(1,ttsim)) .eq. .true.) )
-      if (explosiveerror .eq. .true.)  then
+      explosiveerror = ( (non_explosive .eqv. .false.) .or. (isnan(endogvar(1,ttsim)) .eqv. .true.) )
+      if (explosiveerror .eqv. .true.)  then
          counter = max(ttsim-200,0)
-         errcode = vdrnggaussian( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
-         if (explosiveerror == .true.) then 
+         xrandn = rng%norm_rvs(linsol%nexog, capt)
+         !errcode = vdrnggaussian( method, stream, linsol%nexog*capt, xrandn, 0.0d0, 1.0d0)
+         if (explosiveerror .eqv. .true.) then 
             !write(*,*) 'solution exploded at ', ttsim, ' vs ulim ', ulim
 	    count_exploded = count_exploded + 1
          end if
@@ -763,11 +770,11 @@ counterloop: do
       convergence = .false.
    end if 
 
-   if (convergence .eq. .false.) then
+   if (convergence .eqv. .false.) then
       return
    end if
 
-   if (explosiveerror .eq. .false.) then
+   if (explosiveerror .eqv. .false.) then
       counter = counter + displacement
    end if
 

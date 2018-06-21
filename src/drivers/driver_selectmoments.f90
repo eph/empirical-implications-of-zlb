@@ -43,7 +43,7 @@ program driver_simdata
   call cli%get(switch='-c',val=capt_simdata)
   call cli%get(switch='-m',val=modelindex)
 
-  if (parallelswitch .eq. .true.) then
+  if (parallelswitch .eqv. .true.) then
      call MPI_init(mpierror)
      call MPI_Comm_size(MPI_COMM_WORLD,nproc,mpierror)
      call MPI_Comm_rank(MPI_COMM_WORLD,rank,mpierror)
@@ -79,13 +79,13 @@ program driver_simdata
      call read_matrix(filename,m%solution%poly%nparams,1,m%params)
  
      !solve model
-     if (parallelswitch .eq. .true.) then
+     if (parallelswitch .eqv. .true.) then
         convergence = m%solve_parallel(m%params,nproc,rank)
      else
         convergence = m%solve(m%params)
      end if
 
-     if (convergence .eq. .false.) then  !if no solution, report this back to disk
+     if (convergence .eqv. .false.) then  !if no solution, report this back to disk
         if (rank .eq. 0) then
            write(*,*) 'Failed to converge for parameters when id = ', id
            write(*,*) '----------------------------------'
@@ -126,7 +126,7 @@ program driver_simdata
   deallocate(modeldata)
   call m%cleanup()
 
-  if (parallelswitch .eq. .true.) then
+  if (parallelswitch .eqv. .true.) then
      call MPI_finalize(mpierror)
   end if
    
