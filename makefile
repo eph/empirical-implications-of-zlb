@@ -43,7 +43,7 @@ SLICOT = -L/mq/home/m1eph00/lib -lslicot_sequential
 #------------------------------------------------------------
 # for debug FC2 = -g -check all -warn all
 # use -fp-model precise for value-safe optimization of fp calculations (SLOW)
-FC2 = -O3 -ffree-line-length-1000  #-nocheck -inline-level=2 -shared-intel -mcmodel=medium -xSSE4.2 -ipo 
+FC2 = -g -fcheck=bounds -ffree-line-length-1000 #-O3 -ffree-line-length-1000  #-nocheck -inline-level=2 -shared-intel -mcmodel=medium -xSSE4.2 -ipo 
 FFLAGS = -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
 CFLAGS = -c -I$(SPAMADIR)/src/main/include -I/opt/intel/mkl/include
 VPATH=src/model:src/temp:src/fortress:src/drivers:src/linear_model:generated_linear_model/base:generated_linear_model/base/amiller
@@ -64,10 +64,10 @@ $(MODNAME)_AMA_matrices.o : $(MODNAME)_AMA_matrices.c
 	$(CC) -shared -fPIC $(CFLAGS) -c $< -I$(SPAMADIR)/src/main/include 
 
 driver_irfs: $(LOBJS) driver_irfs.f90 
-	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_irfs
+	$(FC) $(FC2)  $(FLAP) -mkl $^ -o driver_irfs
 
 driver_simdata: $(LOBJS) driver_simdata.f90
-	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP)  $^ -o driver_simdata
+	$(FC) $(FC2) $(FLAP) $(JSON) $(FORTRESS) $^ -o driver_simdata  -lopenblas $(FLAP) $(JSON) $(FORTRESS) $(JSON)
 
 driver_selectmoments: $(LOBJS) driver_selectmoments.f90
 	$(FC) $(FC2) $(FOBJS) $(COBJS) $(FLAP) -mkl $^ -o driver_selectmoments
