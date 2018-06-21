@@ -52,10 +52,10 @@ driver_simdata: $(LOBJS) driver_simdata.f90
 driver_selectmoments: $(LOBJS) driver_selectmoments.f90
 	$(FC) $(FC2)  $^ -o driver_selectmoments $(LAPACK) $(FLAP) $(FORTRESS) $(JSON)
 
-driver_prwmh: $(LOBJS) RandomNumber.o particles.o ParallelParticleFilter.o driver_prwmh.f90
+driver_prwmh: $(LOBJS) particles.o ParallelParticleFilter.o driver_prwmh.f90
 	$(FC) $(FC2) $^ -o driver_prwmh $(LAPACK) $(FLAP) $(FORTRESS) $(JSON)
 
-driver_smoother: $(LOBJS) RandomNumber.o particles.o class_ParticleSmoother.o driver_smoother.f90
+driver_smoother: $(LOBJS) particles.o class_ParticleSmoother.o driver_smoother.f90
 	$(FC) $(FC2) $^ -o driver_smoother $(LAPACK) $(FLAP) $(FORTRESS) $(JSON)
 
 driver_equity_premium : $(LOBJS) driver_equity_premium.f90

@@ -2,7 +2,7 @@ module class_ParticleSmoother
 
   use class_model, only: model
   use class_ParticleSystem, only: ParticleSystem
-  use class_RandomNumber, only: RandomNumber
+  use fortress_random_t, only: fortress_random
 
   implicit none
 
@@ -20,7 +20,7 @@ module class_ParticleSmoother
 
      type(Model) :: m
 
-     type(RandomNumber) :: rng
+     type(fortress_random) :: rng
 
 
 
@@ -55,7 +55,7 @@ contains
        rng_seed = 0
     end if
 
-    ppf%rng = RandomNumber(seed=rng_seed)
+    ppf%rng = fortress_random(seed=rng_seed)
     ppf%m = m
 
     allocate(ppf%adjusted_proposal(ppf%m%T), ppf%adjusted_proposal_mu(ppf%m%T, ppf%m%nexog), &
@@ -112,7 +112,7 @@ contains
     lik = 0.0d0
 
 
-    if (converged==.false.) then
+    if (converged .eqv. .false.) then
        lik = -1000000000000.0d0
        return 
     end if

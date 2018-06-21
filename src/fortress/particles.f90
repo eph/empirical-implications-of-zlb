@@ -151,8 +151,8 @@ contains
     open(346, file=weight_name, action='write')
 
     do i = 1, self%npart
-       write(345, '(100f)') self%particles(:, i)
-       write(346, '(100f)') self%weights(i)
+       write(345, '(100f16.8)') self%particles(:, i)
+       write(346, '(100f16.8)') self%weights(i)
     end do
 
     close(345)

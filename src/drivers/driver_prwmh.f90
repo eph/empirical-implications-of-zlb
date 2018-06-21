@@ -3,7 +3,7 @@ program ghlss_rwmh_driver
   use flap, only : command_line_interface
   use class_model, only: model
   use class_ParallelParticleFilter, only: ParallelParticleFilter
-  use class_RandomNumber, only: RandomNumber
+  use fortress_random_t, only: fortress_random
   !use class_TemperedParticleFilter, only: ParallelParticleFilter => TemperedParticleFilter 
   use json_module
 
@@ -24,7 +24,7 @@ program ghlss_rwmh_driver
 
   type(model) :: dsge
   type(ParallelParticleFilter) :: ppf
-  type(RandomNumber) :: random_number
+  type(fortress_random) :: random_number
 
   type(json_core) :: json 
   type(json_value), pointer :: p, inp, output
@@ -152,7 +152,7 @@ program ghlss_rwmh_driver
 
 
 
-   random_number = RandomNumber(seed=seed)
+   random_number = fortress_random(seed=seed)
    if (rank==0) print*,'Initial Log Likelihood:', lik0
    if (rank==0) open(1, file=tmp_file, action='write')
 
@@ -203,7 +203,7 @@ program ghlss_rwmh_driver
         print*,sum(parasim(:,13))/dble(i-1)
         print*,'===================================================================='
 
-        write(1, '(100f)') parasim(:,i)
+        write(1, '(100f16.8)') parasim(:,i)
 
      end if
   end do

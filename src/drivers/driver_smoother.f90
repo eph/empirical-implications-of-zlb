@@ -2,7 +2,6 @@ program ghlss_smoother_driver
 
   use class_model, only: model
   use class_ParticleSmoother, only: ParticleSmoother
-  use class_RandomNumber, only: RandomNumber
 
   use json_module
 
@@ -44,7 +43,7 @@ program ghlss_smoother_driver
        description='Runs the particle filter and smoother for a given set of parameters')
 
 
-  call cli%add(switch='--p0', switch_ab='-p0', required=.false., def='inputs/case-0/pmsv00.txt',help='Parameters values for model.')
+  call cli%add(switch='--p0', switch_ab='-p0', required=.false., def='input/mean.txt',help='Parameters values for model.')
   call cli%add(switch='--npart', required=.false., def='1500000',help='Number of Particles for PF')
   call cli%add(switch='--output-file', required=.false., def='output.json',help='Output file')
   call cli%add(switch='--nsave',required=.false.,def='10',help='Number of draws to save')
@@ -55,26 +54,6 @@ program ghlss_smoother_driver
   call cli%get(switch='--p0', val=pmsv_file)
   call cli%get(switch='--seed', val=seed)
   call cli%get(switch='--output-file', val=out_file)
-
-
-  ! npart = 150000
-  ! out_file = 'test.json'
-  ! do i = 1, command_argument_count()
-  !    call get_command_argument(i, arg)
-
-  !    select case(arg)
-  !    case('--pmsv','-p0')
-  !       call get_command_argument(i+1,arg)
-  !       pmsv_file = arg
-  !    case('--outfile')
-  !       call get_command_argument(i+1,arg)
-  !       out_file = arg
-  !    case('--npart')
-  !       call get_command_argument(i+1,arg)
-  !       read(arg, '(i)') npart
-
-  !    end select
-  ! end do
 
   dsge = model(.true.)
   print*,'dsge%T', dsge%T
