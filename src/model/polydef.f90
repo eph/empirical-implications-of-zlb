@@ -621,7 +621,7 @@ do ss = 1,ns
           0.0d0, endogvar, 1)
       call dgemv('N', nvars, nexog, 1.0d0, bblin, nvars, exogval, 1, &
           0.0d0, exogpart, 1)
-      endogvar = endogsteady + endogvar + exogpart
+      endogvar = endogsteady(1:nvars) + endogvar + exogpart
       yy(:,i) = endogvar( (/10,11,18,19,21,22,13/) )   
    end do
   

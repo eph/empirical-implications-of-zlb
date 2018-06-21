@@ -70,7 +70,7 @@ end if
 
 
 nmsvplus = solution%poly%nmsv+solution%poly%nexogcont
-solution%poly%slopeconmsv(1:nmsvplus) = 2.0d0/(msvbounds(nmsvplus+1:nmsvplus)-msvbounds(1:nmsvplus))
+solution%poly%slopeconmsv(1:nmsvplus) = 2.0d0/(msvbounds(nmsvplus+1:2*nmsvplus)-msvbounds(1:nmsvplus))
 solution%poly%slopeconmsv(nmsvplus+1:2*nmsvplus) = -2.0d0*msvbounds(1:nmsvplus)/&
      (msvbounds(nmsvplus+1:2*nmsvplus)-msvbounds(1:nmsvplus))-1.0d0
 slopeconxx(1:nmsvplus) = 0.5d0*(msvbounds(nmsvplus+1:2*nmsvplus)-&

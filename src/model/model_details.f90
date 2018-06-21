@@ -632,7 +632,7 @@ end do
 
 exoggrid = 0.0d0
 do ss = 1,ns
-   currentshockindex = exogvarinfo(:,ss)
+   currentshockindex = exogvarinfo(1:nexogshock,ss)
    nshocksum_vec = 0
    nall = ngridshocks(1)
    shockpos = currentshockindex(1)
