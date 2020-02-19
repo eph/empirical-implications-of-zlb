@@ -150,7 +150,7 @@ calibration:
     kss : labss*(gz^(alpha/(alpha-1.0)))*k2yrat^(1.0/(1.0-alpha))
     gdpss : (kss/gz)^alpha*labss^(1.0-alpha)
     invss : shriy*gdpss
-    phii_jpt : phii/invss
+    phii_jpt : phii
     css : shrcy*gdpss
     rwss : (1.0-alpha)*mc*gdpss/labss
     mucss : (1.0/css)*(1.0/(1.0-gamtil))
