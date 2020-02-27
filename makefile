@@ -1,10 +1,10 @@
 # ['gfortran','ifort']
-COMPILER := gfortran
+COMPILER ?= gfortran
 
 #------------------------------------------------------------
 # external fortran libraries
 #------------------------------------------------------------ 
-CONDA=$(HOME)/anaconda3
+CONDA ?= $(HOME)/anaconda3
 JSON=-I$(CONDA)/include/json-fortran -L$(CONDA)/lib/json-fortran -ljsonfortran
 FLAP=-I$(CONDA)/include/flap -L$(CONDA)/lib -lflap
 FORTRESS=-I$(CONDA)/include/fortress -L$(CONDA)/lib/ -lfortress
