@@ -514,7 +514,7 @@ exp_eul(4) = params(1)*exp_var(4)+(params(10)/params(8))*endogvar(10)*endogvar(1
            ( (params(4)*endogvar(12)**params(6)/endogvar(10))-((params(10)-1.0d0)/&
            params(10))*endogvar(4) ) 
 exp_eul(5) = exp_var(5)
-exp_eul(6) = (params(1)/params(3))*exp_var(6)/endogvar(10) - 0.5d0*endogvar(11)*invshk*(endogvar(17)-1.0d0)*(endogvar(17)-1.0d0)
+exp_eul(6) = params(1)*exp_var(6)/endogvar(10) - 0.5d0*endogvar(11)*invshk*(endogvar(17)-1.0d0)*(endogvar(17)-1.0d0)
 
 polyappnew(1) = log(exp_eul(1))
 polyappnew(2) = log(exp_eul(2))
@@ -533,7 +533,7 @@ if ((zlbinfo .ne. 0) .and. (poly%zlbswitch .eqv. .true.)) then
            ( (params(4)*endogvarzlb(12)**params(6)/endogvarzlb(10))-((params(10)-1.0d0)/&
            params(10))*endogvarzlb(4) ) 
    exp_eul(11) = exp_var(11)
-   exp_eul(12) = (params(1)/params(3))*exp_var(12)/endogvarzlb(10) - 0.5d0*endogvarzlb(11)*invshk*&
+   exp_eul(12) = params(1)*exp_var(12)/endogvarzlb(10) - 0.5d0*endogvarzlb(11)*invshk*&
         (endogvarzlb(17)-1.0d0)*(endogvarzlb(17)-1.0d0)
 
    polyappnew(8) = log(exp_eul(7))
