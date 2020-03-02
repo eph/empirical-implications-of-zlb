@@ -2,7 +2,7 @@
 %plot_nonlinear_irf.m:  plot impulse responses from nonlinear and
 %linear models 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear all;
+%clear all;
 close all;
 
 fig_dir = '../';
@@ -16,7 +16,7 @@ compareswitch = 0;  %if compareswitch = 0, compare nonlinear
                     %constrained to unconstrained, nonlinear
                     %if compareswitch = -1, then no comparison
 
-shocktype = 1;  %1 is for liquidity shock; 2 is MEI shock
+%shocktype = 1;  %1 is for liquidity shock; 2 is MEI shock
 dset = 'mean'
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
