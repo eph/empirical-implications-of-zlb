@@ -26,6 +26,7 @@ program driver_irfs
   double precision, allocatable :: endogirf(:,:)
   double precision, allocatable :: linirf(:,:)
   double precision, allocatable :: euler_errors(:,:)
+  double precision :: shockscale
   integer :: rank
   integer :: nproc
   integer :: mpierror, error
@@ -51,12 +52,13 @@ program driver_irfs
   call cli%add(switch='--capt',switch_ab='-c',required=.false.,def='20',help='Length of IRF')
   call cli%add(switch='--shockindex',switch_ab='-s',required=.false.,def='1',choices='1,2',help='Shock: (1) Risk Premium; (2) MEI')
   call cli%add(switch='--dsetswitch',switch_ab='-d',required=.false.,def='0',choices='0,1',help='Parameters: (0) Mean; (1) Medium')
+  call cli%add(switch='--scaleshock', switch_ab='-a',required=.false.,def='2.5d0',help='size of shock in stds')
   call cli%parse(error=error)
   call cli%get(switch='-n',val=nsim)
   call cli%get(switch='-c',val=captirf)
   call cli%get(switch='-s',val=shockindex)
   call cli%get(switch='-d',val=dsetswitch)
-  
+  call cli%get(switch='-a',val=shockscale)
   !iniitialize solution details
   zlbswitch = .true.
   m = model(zlbswitch)  
@@ -95,7 +97,7 @@ program driver_irfs
   else  !if computed solution, simulate and send irf data to disk
      if (rank .eq. 0) then
         write(*,*) 'Successfully solved model (driverirf). Computing IRFs.' 
-        call m%simulate_modelirfs(captirf,nsim,shockindex,endogirf,linirf,euler_errors,neulererrors)
+        call m%simulate_modelirfs(captirf,nsim,shockindex,endogirf,linirf,euler_errors,neulererrors, shockscale)
         !send irfs to disk
         if (zlbswitch .eqv. .true.) then
            write(filename,"(A,I0,A)") 'results/irf/nonlinearirf_' // trim(param_type) // '_', shockindex , '.txt'

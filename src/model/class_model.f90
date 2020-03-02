@@ -273,7 +273,7 @@ end subroutine simulate_modeldata
 !> @date 11-17-16
 !> @brief Simulate irfs from the nonlinear and linear models.
 !---------------------------------------------------------------------------------------------------------  
-subroutine simulate_modelirfs(m,capt,nsim,shockindex,endogirf,linirf,euler_errors,neulererrors)
+subroutine simulate_modelirfs(m,capt,nsim,shockindex,endogirf,linirf,euler_errors,neulererrors,scaleshock_opt)
 
   use simulate_model, only: simulate_irfs
   implicit none
@@ -283,6 +283,7 @@ subroutine simulate_modelirfs(m,capt,nsim,shockindex,endogirf,linirf,euler_error
   integer, intent(in) :: nsim
   integer, intent(in) :: shockindex
   integer, intent(in) :: neulererrors
+  double precision, intent(in), optional :: scaleshock_opt
   double precision, intent(out) :: endogirf(m%solution%poly%nvars+m%solution%poly%nexog+2,capt)
   double precision, intent(out) :: linirf(m%solution%poly%nvars+m%solution%poly%nexog+2,capt)
   double precision, intent(out) :: euler_errors(2*neulererrors,capt)
@@ -293,6 +294,13 @@ subroutine simulate_modelirfs(m,capt,nsim,shockindex,endogirf,linirf,euler_error
   double precision :: innov0(m%solution%poly%nexog)
   double precision :: premiumirf(2,capt)
   
+  if (present(scaleshock_opt)) then 
+     scaleshock = scaleshock_opt
+  else
+     scaleshock = 1.d0
+  end if
+
+
   endogvarbas0 = 0.0d0
   endogvarbas0(1:m%solution%poly%nvars) = exp(m%solution%poly%endogsteady(1:m%solution%poly%nvars))
   endogvarshk0 = endogvarbas0
@@ -300,14 +308,12 @@ subroutine simulate_modelirfs(m,capt,nsim,shockindex,endogirf,linirf,euler_error
   
   !shock to liquidity    
   if (shockindex .eq. 1) then
-     scaleshock = 1.0d0
      endogvarshk0(m%solution%poly%nvars+shockindex) = scaleshock*m%params(30)/(1.0d0-m%params(29)**2)    
   end if
 
-  !shock to MEI
+  !shock to MEI -- note this is negative
   if (shockindex .eq. 2) then
-     scaleshock = -1.0d0
-     endogvarshk0(m%solution%poly%nvars+shockindex) = scaleshock*m%params(28)/(1.0d0-m%params(27)**2)      
+     endogvarshk0(m%solution%poly%nvars+shockindex) = -scaleshock*m%params(28)/(1.0d0-m%params(27)**2)      
   end if
   endogvarbas0 = endogvarshk0  !change initial conditions of shock and baseline dset
   innov0(shockindex) = scaleshock
